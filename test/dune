@@ -1,0 +1,2 @@
+(test
+ (name scip_ocaml))
