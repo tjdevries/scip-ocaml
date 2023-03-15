@@ -1,3 +1,4 @@
 (library
  (name scip_ocaml)
+ (modules scip_pb scip_types scip_pp)
  (libraries ocaml-protoc))

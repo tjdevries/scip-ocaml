@@ -3,8 +3,9 @@
 
 ## Regenerate `scip` bindings
 
-TOOD: Should probably nest it one deeper
+TODO: Should probably nest it one deeper
+TODO: You have to add some ignore warnings, but you can probably do that automatically in dune
 
 ```
-❯ ocaml-protoc -binary -ml_out ./lib/ ~/sourcegraph/scip/scip.proto
+❯ ocaml-protoc -binary -pp -ml_out ./lib/ ~/sourcegraph/scip/scip.proto
 ```
