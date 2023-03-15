@@ -3,9 +3,6 @@
 
 ## Regenerate `scip` bindings
 
-TODO: Should probably nest it one deeper
-TODO: You have to add some ignore warnings, but you can probably do that automatically in dune
+This should happen automatically with dune now :) Just make sure you have the deps installed.
 
-```
-❯ ocaml-protoc -binary -pp -ml_out ./lib/ ~/sourcegraph/scip/scip.proto
-```
+You can update `lib/scip.proto` to generate new bindings
