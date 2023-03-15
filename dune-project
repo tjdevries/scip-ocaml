@@ -19,7 +19,10 @@
  (name scip_ocaml)
  (synopsis "Emit SCIP for OCaml")
  (description "A SCIP Indexer for OCaml (powered by Merlin)")
- (depends ocaml dune ocaml-protoc (merlin-lib (>= 4.8)))
+ (depends
+   ocaml
+   compiler-libs.common
+   dune stdune ocaml-protoc (merlin-lib (>= 4.8)))
  (tags
   (topics "to describe" your project)))
 

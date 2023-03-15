@@ -12,6 +12,7 @@ bug-reports: "https://github.com/tjdevries/scip-ocaml/issues"
 depends: [
   "ocaml"
   "dune" {>= "3.7"}
+  "stdune"
   "ocaml-protoc"
   "merlin-lib" {>= "4.8"}
   "odoc" {with-doc}
