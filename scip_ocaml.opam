@@ -11,8 +11,10 @@ doc: "https://url/to/documentation"
 bug-reports: "https://github.com/tjdevries/scip-ocaml/issues"
 depends: [
   "ocaml"
+  "ocaml-compiler-libs"
   "dune" {>= "3.7"}
   "stdune"
+  "utop"
   "ocaml-protoc"
   "merlin-lib" {>= "4.8"}
   "odoc" {with-doc}

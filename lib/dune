@@ -1,7 +1,11 @@
 (library
  (name scip_ocaml)
- (modules scip_pb scip_types scip_pp)
- (libraries ocaml-protoc)
+ (modules scip_pb scip_types scip_pp scip)
+ (libraries
+   ocaml-protoc
+   stdune
+   merlin-lib.ocaml_parsing
+   compiler-libs.common)
  (flags (:standard -w -11)))
 
 (rule

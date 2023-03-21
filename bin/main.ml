@@ -1,104 +1,121 @@
-[@@@ocaml.warning "-11-32"]
+[@@@alert "-unstable"]
+[@@@ocaml.warning "-26-27"]
 
 open Stdune
-open Scip_ocaml.Scip_types
-open Scip_ocaml.Scip_pp
 
-let () = print_endline "Hello, World!"
+let () = print_endline "\nHello, World!\n"
 
-type cm_file = Cmt of string | Cmti of string
+let handle_signature document (signature : Typedtree.signature) =
+  let for_item _ = print_endline "yayaya" in
+  List.iter signature.sig_items ~f:for_item;
+  Format.printf "interface: %d" (List.length signature.sig_items);
+  document
 
-let string_of_cm cm = match cm with Cmt f | Cmti f -> f
-let is_directory dir = try Sys.is_directory dir with Sys_error _ -> false
+let position_to_range (loc : Location.t) =
+  let start_ = loc.loc_start in
+  let finish_ = loc.loc_end in
+  [
+    Int32.of_int (start_.pos_lnum - 1);
+    Int32.of_int (start_.pos_cnum - start_.pos_bol);
+    Int32.of_int (finish_.pos_lnum - 1);
+    Int32.of_int (finish_.pos_cnum - finish_.pos_bol);
+  ]
 
-let find_cm_files dir =
-  let choose_file f1 f2 =
-    match (f1, f2) with
-    | (Cmt _ as f), _ | _, (Cmt _ as f) -> f
-    | (Cmti _ as f), Cmti _ -> f
-  in
-  (* TODO we could get into a symlink loop here so we should we be careful *)
-  let rec loop acc dir =
-    let contents = Sys.readdir dir in
-    Array.fold_left contents ~init:acc ~f:(fun acc fname ->
-        let path = Filename.concat dir fname in
-        if is_directory path then loop acc path
-        else
-          match String.rsplit2 ~on:'.' path with
-          | Some (path_without_ext, "cmt") ->
-              String.Map.set acc path_without_ext (Cmt path)
-          | Some (path_without_ext, "cmti") -> (
-              let current_file = String.Map.find acc path_without_ext in
-              let cmi_file = Cmti path in
-              match current_file with
-              | None -> String.Map.set acc path_without_ext cmi_file
-              | Some current_file ->
-                  String.Map.set acc path_without_ext
-                    (choose_file current_file cmi_file))
-          | _ -> acc)
-  in
-  loop String.Map.empty dir |> String.Map.values
-
-let add_document (index : index) document =
-  (* let _ = Query_protocol.Jump *)
-  (* TODO: Need a way to add external symbols from this document asdf *)
-  { index with documents = document :: index.documents }
-
-let print_cmt cmt =
-  let open Cmt_format in
-  match cmt.cmt_annots with
-  | Implementation structure ->
-      Load_path.init cmt.cmt_loadpath;
-      let map =
+let handle_tree document (structure : Typedtree.structure) =
+  let open Scip_ocaml.Scip_types in
+  let handle_value document (value : Typedtree.value_binding) =
+    let pat = value.vb_pat in
+    match pat.pat_desc with
+    | Typedtree.Tpat_var (ident, loc) ->
+        let range = position_to_range loc.loc in
+        let symbol = "local " ^ Ident.name ident in
+        let symbol_roles = Int32.of_int 1 in
+        Format.printf "  ident: %s %s@." loc.txt (Ident.name ident);
         {
-          Tast_mapper.default with
-          env = (fun _ env -> Envaux.env_of_only_summary env);
+          document with
+          occurrences =
+            default_occurrence ~range ~symbol ~symbol_roles ()
+            :: document.occurrences;
         }
-      in
-      let structure = map.structure map structure in
-      Format.printf "Impl: %a@." Printtyped.implementation structure
-  | _ -> failwith "not a structure"
-
-(* let print_cmi (cmi : Cmi_format.cmi_infos) = *)
-(*   let open Cmt_format in *)
-(*   match cmi.cmt_annots with *)
-(*   | Implementation structure -> *)
-(*       Load_path.init cmi.cmt_loadpath; *)
-(*       let map = *)
-(*         { *)
-(*           Tast_mapper.default with *)
-(*           env = (fun _ env -> Envaux.env_of_only_summary env); *)
-(*         } *)
-(*       in *)
-(*       let structure = map.structure map structure in *)
-(*       Format.printf "Impl: %a@." Printtyped.implementation structure *)
-(*   | _ -> failwith "not a structure" *)
-
-let index project_root =
-  let tool_info =
-    Some (default_tool_info ~name:"scip-ocaml" ~version:"0.0.1" ())
+    | Typedtree.Tpat_any ->
+        print_endline "  got any";
+        document
+    | Typedtree.Tpat_constant _ ->
+        print_endline "  got a constant";
+        document
+    (* | Typedtree.Tpat_alias (_, _, _) -> _ *)
+    (* | Typedtree.Tpat_tuple _ -> _ *)
+    (* | Typedtree.Tpat_construct (_, _, _, _) -> _ *)
+    (* | Typedtree.Tpat_variant (_, _, _) -> _ *)
+    (* | Typedtree.Tpat_record (_, _) -> _ *)
+    (* | Typedtree.Tpat_array _ -> _ *)
+    (* | Typedtree.Tpat_lazy _ -> _ *)
+    (* | Typedtree.Tpat_or (_, _, _) -> _ *)
+    | _ ->
+        print_endline "  some other thing";
+        document
   in
+  let for_item document (item : Typedtree.structure_item) =
+    print_endline "got structure_item";
+    match item.str_desc with
+    | Typedtree.Tstr_value (_, value) ->
+        List.fold_left value ~f:handle_value ~init:document
+    (* | Typedtree.Tstr_eval (_, _) -> _ *)
+    (* | Typedtree.Tstr_primitive _ -> _ *)
+    (* | Typedtree.Tstr_type (_, _) -> _ *)
+    (* | Typedtree.Tstr_typext _ -> _ *)
+    (* | Typedtree.Tstr_exception _ -> _ *)
+    (* | Typedtree.Tstr_module _ -> _ *)
+    (* | Typedtree.Tstr_recmodule _ -> _ *)
+    (* | Typedtree.Tstr_modtype _ -> _ *)
+    (* | Typedtree.Tstr_open _ -> _ *)
+    (* | Typedtree.Tstr_class _ -> _ *)
+    (* | Typedtree.Tstr_class_type _ -> _ *)
+    (* | Typedtree.Tstr_include _ -> _ *)
+    (* | Typedtree.Tstr_attribute _ -> _ *)
+    | _ -> document
+  in
+
+  (* List.iter structure.str_items ~f:for_item; *)
+  List.fold_left structure.str_items ~init:document ~f:for_item
+
+(* Consider exploring this *)
+(* Cmi_format.read_cmi *)
+
+let () =
+  let open Scip_ocaml.Scip_types in
+  print_endline "trying to read a file";
+  let f =
+    "/home/tjdevries/build/simple/_build/default/bin/.main.eobjs/byte/dune__exe__Main.cmt"
+  in
+
+  let project_root = "file:///home/tjdevries/build/simple/" in
+  let tool_info = Some (default_tool_info ()) in
   let metadata = default_metadata ~project_root ~tool_info () in
   let metadata = Some metadata in
-  let x = default_index ~metadata () in
-  let x = add_document x (default_document ()) in
-  if false then Format.printf "x => %a@." pp_index x;
+  let index = default_index ~metadata () in
 
-  let cmt_files = find_cm_files "." in
-  List.iter cmt_files ~f:(fun f ->
-      Format.printf "cmt file => %s@." (string_of_cm f));
+  let info = Cmt_format.read_cmt f in
 
-  (* Compile_common.re *)
-  let f = List.nth cmt_files 2 |> Option.value_exn in
-  let filename = string_of_cm f in
-  let _, cmt_info = Cmt_format.read filename in
-  let cmt_info = Option.value_exn cmt_info in
-  print_cmt cmt_info
+  let relative_path = info.cmt_sourcefile in
+  let document = default_document ~language:"ocaml" ?relative_path () in
 
-(* let cmi_infos = Option.value_exn cmi_infos in *)
-(* let _ = cmi_infos in *)
-(* assert false *)
-(* print_cmi cmi_info *)
-(* Format.printf "filename => %s@." cmi_info *)
+  let document =
+    match info.cmt_annots with
+    | Cmt_format.Implementation tree -> handle_tree document tree
+    | Cmt_format.Interface signature -> handle_signature document signature
+    | _ -> failwith "not a cmti file"
+  in
 
-let () = index "test"
+  let index = { index with documents = document :: index.documents } in
+  let p_encoder = Pbrt.Encoder.create () in
+
+  let write_index = Scip_ocaml.Scip_pb.encode_index index in
+  let output = write_index p_encoder in
+
+  let file = open_out "test.scip" in
+  let bytes = Pbrt.Encoder.to_bytes p_encoder in
+  output_bytes file bytes;
+  close_out file;
+
+  print_endline "read the file"
