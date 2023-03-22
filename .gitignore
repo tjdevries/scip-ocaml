@@ -28,4 +28,7 @@ setup.log
 # Local OPAM switch
 _opam/
 
+# duniverse is from opam-monorepo
+duniverse/
+
 *.scip
