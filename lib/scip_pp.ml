@@ -1,68 +1,33 @@
 [@@@ocaml.warning "-27-30-39"]
 
-let rec pp_protocol_version fmt (v : Scip_types.protocol_version) =
+let rec pp_protocol_version fmt (v:Scip_types.protocol_version) =
   match v with
-  | Scip_types.Unspecified_protocol_version ->
-    Format.fprintf fmt "Unspecified_protocol_version"
-;;
+  | Scip_types.Unspecified_protocol_version -> Format.fprintf fmt "Unspecified_protocol_version"
 
-let rec pp_tool_info fmt (v : Scip_types.tool_info) =
+let rec pp_tool_info fmt (v:Scip_types.tool_info) = 
   let pp_i fmt () =
     Pbrt.Pp.pp_record_field ~first:true "name" Pbrt.Pp.pp_string fmt v.Scip_types.name;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "version"
-      Pbrt.Pp.pp_string
-      fmt
-      v.Scip_types.version;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "arguments"
-      (Pbrt.Pp.pp_list Pbrt.Pp.pp_string)
-      fmt
-      v.Scip_types.arguments
+    Pbrt.Pp.pp_record_field ~first:false "version" Pbrt.Pp.pp_string fmt v.Scip_types.version;
+    Pbrt.Pp.pp_record_field ~first:false "arguments" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.Scip_types.arguments;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
-;;
 
-let rec pp_text_encoding fmt (v : Scip_types.text_encoding) =
+let rec pp_text_encoding fmt (v:Scip_types.text_encoding) =
   match v with
   | Scip_types.Unspecified_text_encoding -> Format.fprintf fmt "Unspecified_text_encoding"
   | Scip_types.Utf8 -> Format.fprintf fmt "Utf8"
   | Scip_types.Utf16 -> Format.fprintf fmt "Utf16"
-;;
 
-let rec pp_metadata fmt (v : Scip_types.metadata) =
+let rec pp_metadata fmt (v:Scip_types.metadata) = 
   let pp_i fmt () =
-    Pbrt.Pp.pp_record_field
-      ~first:true
-      "version"
-      pp_protocol_version
-      fmt
-      v.Scip_types.version;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "tool_info"
-      (Pbrt.Pp.pp_option pp_tool_info)
-      fmt
-      v.Scip_types.tool_info;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "project_root"
-      Pbrt.Pp.pp_string
-      fmt
-      v.Scip_types.project_root;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "text_document_encoding"
-      pp_text_encoding
-      fmt
-      v.Scip_types.text_document_encoding
+    Pbrt.Pp.pp_record_field ~first:true "version" pp_protocol_version fmt v.Scip_types.version;
+    Pbrt.Pp.pp_record_field ~first:false "tool_info" (Pbrt.Pp.pp_option pp_tool_info) fmt v.Scip_types.tool_info;
+    Pbrt.Pp.pp_record_field ~first:false "project_root" Pbrt.Pp.pp_string fmt v.Scip_types.project_root;
+    Pbrt.Pp.pp_record_field ~first:false "text_document_encoding" pp_text_encoding fmt v.Scip_types.text_document_encoding;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
-;;
 
-let rec pp_syntax_kind fmt (v : Scip_types.syntax_kind) =
+let rec pp_syntax_kind fmt (v:Scip_types.syntax_kind) =
   match v with
   | Scip_types.Unspecified_syntax_kind -> Format.fprintf fmt "Unspecified_syntax_kind"
   | Scip_types.Comment -> Format.fprintf fmt "Comment"
@@ -82,11 +47,9 @@ let rec pp_syntax_kind fmt (v : Scip_types.syntax_kind) =
   | Scip_types.Identifier_namespace -> Format.fprintf fmt "Identifier_namespace"
   | Scip_types.Identifier_module -> Format.fprintf fmt "Identifier_module"
   | Scip_types.Identifier_function -> Format.fprintf fmt "Identifier_function"
-  | Scip_types.Identifier_function_definition ->
-    Format.fprintf fmt "Identifier_function_definition"
+  | Scip_types.Identifier_function_definition -> Format.fprintf fmt "Identifier_function_definition"
   | Scip_types.Identifier_macro -> Format.fprintf fmt "Identifier_macro"
-  | Scip_types.Identifier_macro_definition ->
-    Format.fprintf fmt "Identifier_macro_definition"
+  | Scip_types.Identifier_macro_definition -> Format.fprintf fmt "Identifier_macro_definition"
   | Scip_types.Identifier_type -> Format.fprintf fmt "Identifier_type"
   | Scip_types.Identifier_builtin_type -> Format.fprintf fmt "Identifier_builtin_type"
   | Scip_types.Identifier_attribute -> Format.fprintf fmt "Identifier_attribute"
@@ -105,217 +68,86 @@ let rec pp_syntax_kind fmt (v : Scip_types.syntax_kind) =
   | Scip_types.Tag -> Format.fprintf fmt "Tag"
   | Scip_types.Tag_attribute -> Format.fprintf fmt "Tag_attribute"
   | Scip_types.Tag_delimiter -> Format.fprintf fmt "Tag_delimiter"
-;;
 
-let rec pp_severity fmt (v : Scip_types.severity) =
+let rec pp_severity fmt (v:Scip_types.severity) =
   match v with
   | Scip_types.Unspecified_severity -> Format.fprintf fmt "Unspecified_severity"
   | Scip_types.Error -> Format.fprintf fmt "Error"
   | Scip_types.Warning -> Format.fprintf fmt "Warning"
   | Scip_types.Information -> Format.fprintf fmt "Information"
   | Scip_types.Hint -> Format.fprintf fmt "Hint"
-;;
 
-let rec pp_diagnostic_tag fmt (v : Scip_types.diagnostic_tag) =
+let rec pp_diagnostic_tag fmt (v:Scip_types.diagnostic_tag) =
   match v with
-  | Scip_types.Unspecified_diagnostic_tag ->
-    Format.fprintf fmt "Unspecified_diagnostic_tag"
+  | Scip_types.Unspecified_diagnostic_tag -> Format.fprintf fmt "Unspecified_diagnostic_tag"
   | Scip_types.Unnecessary -> Format.fprintf fmt "Unnecessary"
   | Scip_types.Deprecated -> Format.fprintf fmt "Deprecated"
-;;
 
-let rec pp_diagnostic fmt (v : Scip_types.diagnostic) =
+let rec pp_diagnostic fmt (v:Scip_types.diagnostic) = 
   let pp_i fmt () =
     Pbrt.Pp.pp_record_field ~first:true "severity" pp_severity fmt v.Scip_types.severity;
     Pbrt.Pp.pp_record_field ~first:false "code" Pbrt.Pp.pp_string fmt v.Scip_types.code;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "message"
-      Pbrt.Pp.pp_string
-      fmt
-      v.Scip_types.message;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "source"
-      Pbrt.Pp.pp_string
-      fmt
-      v.Scip_types.source;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "tags"
-      (Pbrt.Pp.pp_list pp_diagnostic_tag)
-      fmt
-      v.Scip_types.tags
+    Pbrt.Pp.pp_record_field ~first:false "message" Pbrt.Pp.pp_string fmt v.Scip_types.message;
+    Pbrt.Pp.pp_record_field ~first:false "source" Pbrt.Pp.pp_string fmt v.Scip_types.source;
+    Pbrt.Pp.pp_record_field ~first:false "tags" (Pbrt.Pp.pp_list pp_diagnostic_tag) fmt v.Scip_types.tags;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
-;;
 
-let rec pp_occurrence fmt (v : Scip_types.occurrence) =
+let rec pp_occurrence fmt (v:Scip_types.occurrence) = 
   let pp_i fmt () =
-    Pbrt.Pp.pp_record_field
-      ~first:true
-      "range"
-      (Pbrt.Pp.pp_list Pbrt.Pp.pp_int32)
-      fmt
-      v.Scip_types.range;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "symbol"
-      Pbrt.Pp.pp_string
-      fmt
-      v.Scip_types.symbol;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "symbol_roles"
-      Pbrt.Pp.pp_int32
-      fmt
-      v.Scip_types.symbol_roles;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "override_documentation"
-      (Pbrt.Pp.pp_list Pbrt.Pp.pp_string)
-      fmt
-      v.Scip_types.override_documentation;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "syntax_kind"
-      pp_syntax_kind
-      fmt
-      v.Scip_types.syntax_kind;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "diagnostics"
-      (Pbrt.Pp.pp_list pp_diagnostic)
-      fmt
-      v.Scip_types.diagnostics
+    Pbrt.Pp.pp_record_field ~first:true "range" (Pbrt.Pp.pp_list Pbrt.Pp.pp_int32) fmt v.Scip_types.range;
+    Pbrt.Pp.pp_record_field ~first:false "symbol" Pbrt.Pp.pp_string fmt v.Scip_types.symbol;
+    Pbrt.Pp.pp_record_field ~first:false "symbol_roles" Pbrt.Pp.pp_int32 fmt v.Scip_types.symbol_roles;
+    Pbrt.Pp.pp_record_field ~first:false "override_documentation" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.Scip_types.override_documentation;
+    Pbrt.Pp.pp_record_field ~first:false "syntax_kind" pp_syntax_kind fmt v.Scip_types.syntax_kind;
+    Pbrt.Pp.pp_record_field ~first:false "diagnostics" (Pbrt.Pp.pp_list pp_diagnostic) fmt v.Scip_types.diagnostics;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
-;;
 
-let rec pp_relationship fmt (v : Scip_types.relationship) =
+let rec pp_relationship fmt (v:Scip_types.relationship) = 
   let pp_i fmt () =
     Pbrt.Pp.pp_record_field ~first:true "symbol" Pbrt.Pp.pp_string fmt v.Scip_types.symbol;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "is_reference"
-      Pbrt.Pp.pp_bool
-      fmt
-      v.Scip_types.is_reference;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "is_implementation"
-      Pbrt.Pp.pp_bool
-      fmt
-      v.Scip_types.is_implementation;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "is_type_definition"
-      Pbrt.Pp.pp_bool
-      fmt
-      v.Scip_types.is_type_definition;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "is_definition"
-      Pbrt.Pp.pp_bool
-      fmt
-      v.Scip_types.is_definition
+    Pbrt.Pp.pp_record_field ~first:false "is_reference" Pbrt.Pp.pp_bool fmt v.Scip_types.is_reference;
+    Pbrt.Pp.pp_record_field ~first:false "is_implementation" Pbrt.Pp.pp_bool fmt v.Scip_types.is_implementation;
+    Pbrt.Pp.pp_record_field ~first:false "is_type_definition" Pbrt.Pp.pp_bool fmt v.Scip_types.is_type_definition;
+    Pbrt.Pp.pp_record_field ~first:false "is_definition" Pbrt.Pp.pp_bool fmt v.Scip_types.is_definition;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
-;;
 
-let rec pp_symbol_information fmt (v : Scip_types.symbol_information) =
+let rec pp_symbol_information fmt (v:Scip_types.symbol_information) = 
   let pp_i fmt () =
     Pbrt.Pp.pp_record_field ~first:true "symbol" Pbrt.Pp.pp_string fmt v.Scip_types.symbol;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "documentation"
-      (Pbrt.Pp.pp_list Pbrt.Pp.pp_string)
-      fmt
-      v.Scip_types.documentation;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "relationships"
-      (Pbrt.Pp.pp_list pp_relationship)
-      fmt
-      v.Scip_types.relationships
+    Pbrt.Pp.pp_record_field ~first:false "documentation" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.Scip_types.documentation;
+    Pbrt.Pp.pp_record_field ~first:false "relationships" (Pbrt.Pp.pp_list pp_relationship) fmt v.Scip_types.relationships;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
-;;
 
-let rec pp_document fmt (v : Scip_types.document) =
+let rec pp_document fmt (v:Scip_types.document) = 
   let pp_i fmt () =
-    Pbrt.Pp.pp_record_field
-      ~first:true
-      "language"
-      Pbrt.Pp.pp_string
-      fmt
-      v.Scip_types.language;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "relative_path"
-      Pbrt.Pp.pp_string
-      fmt
-      v.Scip_types.relative_path;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "occurrences"
-      (Pbrt.Pp.pp_list pp_occurrence)
-      fmt
-      v.Scip_types.occurrences;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "symbols"
-      (Pbrt.Pp.pp_list pp_symbol_information)
-      fmt
-      v.Scip_types.symbols
+    Pbrt.Pp.pp_record_field ~first:true "language" Pbrt.Pp.pp_string fmt v.Scip_types.language;
+    Pbrt.Pp.pp_record_field ~first:false "relative_path" Pbrt.Pp.pp_string fmt v.Scip_types.relative_path;
+    Pbrt.Pp.pp_record_field ~first:false "occurrences" (Pbrt.Pp.pp_list pp_occurrence) fmt v.Scip_types.occurrences;
+    Pbrt.Pp.pp_record_field ~first:false "symbols" (Pbrt.Pp.pp_list pp_symbol_information) fmt v.Scip_types.symbols;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
-;;
 
-let rec pp_index fmt (v : Scip_types.index) =
+let rec pp_index fmt (v:Scip_types.index) = 
   let pp_i fmt () =
-    Pbrt.Pp.pp_record_field
-      ~first:true
-      "metadata"
-      (Pbrt.Pp.pp_option pp_metadata)
-      fmt
-      v.Scip_types.metadata;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "documents"
-      (Pbrt.Pp.pp_list pp_document)
-      fmt
-      v.Scip_types.documents;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "external_symbols"
-      (Pbrt.Pp.pp_list pp_symbol_information)
-      fmt
-      v.Scip_types.external_symbols
+    Pbrt.Pp.pp_record_field ~first:true "metadata" (Pbrt.Pp.pp_option pp_metadata) fmt v.Scip_types.metadata;
+    Pbrt.Pp.pp_record_field ~first:false "documents" (Pbrt.Pp.pp_list pp_document) fmt v.Scip_types.documents;
+    Pbrt.Pp.pp_record_field ~first:false "external_symbols" (Pbrt.Pp.pp_list pp_symbol_information) fmt v.Scip_types.external_symbols;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
-;;
 
-let rec pp_package fmt (v : Scip_types.package) =
+let rec pp_package fmt (v:Scip_types.package) = 
   let pp_i fmt () =
-    Pbrt.Pp.pp_record_field
-      ~first:true
-      "manager"
-      Pbrt.Pp.pp_string
-      fmt
-      v.Scip_types.manager;
+    Pbrt.Pp.pp_record_field ~first:true "manager" Pbrt.Pp.pp_string fmt v.Scip_types.manager;
     Pbrt.Pp.pp_record_field ~first:false "name" Pbrt.Pp.pp_string fmt v.Scip_types.name;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "version"
-      Pbrt.Pp.pp_string
-      fmt
-      v.Scip_types.version
+    Pbrt.Pp.pp_record_field ~first:false "version" Pbrt.Pp.pp_string fmt v.Scip_types.version;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
-;;
 
-let rec pp_descriptor_suffix fmt (v : Scip_types.descriptor_suffix) =
+let rec pp_descriptor_suffix fmt (v:Scip_types.descriptor_suffix) =
   match v with
   | Scip_types.Unspecified_suffix -> Format.fprintf fmt "Unspecified_suffix"
   | Scip_types.Namespace -> Format.fprintf fmt "Namespace"
@@ -328,47 +160,24 @@ let rec pp_descriptor_suffix fmt (v : Scip_types.descriptor_suffix) =
   | Scip_types.Macro -> Format.fprintf fmt "Macro"
   | Scip_types.Meta -> Format.fprintf fmt "Meta"
   | Scip_types.Local -> Format.fprintf fmt "Local"
-;;
 
-let rec pp_descriptor fmt (v : Scip_types.descriptor) =
+let rec pp_descriptor fmt (v:Scip_types.descriptor) = 
   let pp_i fmt () =
     Pbrt.Pp.pp_record_field ~first:true "name" Pbrt.Pp.pp_string fmt v.Scip_types.name;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "disambiguator"
-      Pbrt.Pp.pp_string
-      fmt
-      v.Scip_types.disambiguator;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "suffix"
-      pp_descriptor_suffix
-      fmt
-      v.Scip_types.suffix
+    Pbrt.Pp.pp_record_field ~first:false "disambiguator" Pbrt.Pp.pp_string fmt v.Scip_types.disambiguator;
+    Pbrt.Pp.pp_record_field ~first:false "suffix" pp_descriptor_suffix fmt v.Scip_types.suffix;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
-;;
 
-let rec pp_symbol fmt (v : Scip_types.symbol) =
+let rec pp_symbol fmt (v:Scip_types.symbol) = 
   let pp_i fmt () =
     Pbrt.Pp.pp_record_field ~first:true "scheme" Pbrt.Pp.pp_string fmt v.Scip_types.scheme;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "package"
-      (Pbrt.Pp.pp_option pp_package)
-      fmt
-      v.Scip_types.package;
-    Pbrt.Pp.pp_record_field
-      ~first:false
-      "descriptors"
-      (Pbrt.Pp.pp_list pp_descriptor)
-      fmt
-      v.Scip_types.descriptors
+    Pbrt.Pp.pp_record_field ~first:false "package" (Pbrt.Pp.pp_option pp_package) fmt v.Scip_types.package;
+    Pbrt.Pp.pp_record_field ~first:false "descriptors" (Pbrt.Pp.pp_list pp_descriptor) fmt v.Scip_types.descriptors;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
-;;
 
-let rec pp_symbol_role fmt (v : Scip_types.symbol_role) =
+let rec pp_symbol_role fmt (v:Scip_types.symbol_role) =
   match v with
   | Scip_types.Unspecified_symbol_role -> Format.fprintf fmt "Unspecified_symbol_role"
   | Scip_types.Definition -> Format.fprintf fmt "Definition"
@@ -377,9 +186,8 @@ let rec pp_symbol_role fmt (v : Scip_types.symbol_role) =
   | Scip_types.Read_access -> Format.fprintf fmt "Read_access"
   | Scip_types.Generated -> Format.fprintf fmt "Generated"
   | Scip_types.Test -> Format.fprintf fmt "Test"
-;;
 
-let rec pp_language fmt (v : Scip_types.language) =
+let rec pp_language fmt (v:Scip_types.language) =
   match v with
   | Scip_types.Unspecified_language -> Format.fprintf fmt "Unspecified_language"
   | Scip_types.Abap -> Format.fprintf fmt "Abap"
@@ -475,4 +283,3 @@ let rec pp_language fmt (v : Scip_types.language) =
   | Scip_types.Xsl -> Format.fprintf fmt "Xsl"
   | Scip_types.Yaml -> Format.fprintf fmt "Yaml"
   | Scip_types.Zig -> Format.fprintf fmt "Zig"
-;;
