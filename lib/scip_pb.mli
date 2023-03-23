@@ -1,9 +1,9 @@
 (** scip.proto Binary Encoding *)
 
-
 (** {2 Protobuf Encoding} *)
 
-val encode_protocol_version : Scip_types.protocol_version -> Pbrt.Encoder.t -> unit
+val encode_protocol_version :
+  Scip_types.protocol_version -> Pbrt.Encoder.t -> unit
 (** [encode_protocol_version v encoder] encodes [v] with the given [encoder] *)
 
 val encode_tool_info : Scip_types.tool_info -> Pbrt.Encoder.t -> unit
@@ -33,7 +33,8 @@ val encode_occurrence : Scip_types.occurrence -> Pbrt.Encoder.t -> unit
 val encode_relationship : Scip_types.relationship -> Pbrt.Encoder.t -> unit
 (** [encode_relationship v encoder] encodes [v] with the given [encoder] *)
 
-val encode_symbol_information : Scip_types.symbol_information -> Pbrt.Encoder.t -> unit
+val encode_symbol_information :
+  Scip_types.symbol_information -> Pbrt.Encoder.t -> unit
 (** [encode_symbol_information v encoder] encodes [v] with the given [encoder] *)
 
 val encode_document : Scip_types.document -> Pbrt.Encoder.t -> unit
@@ -45,7 +46,8 @@ val encode_index : Scip_types.index -> Pbrt.Encoder.t -> unit
 val encode_package : Scip_types.package -> Pbrt.Encoder.t -> unit
 (** [encode_package v encoder] encodes [v] with the given [encoder] *)
 
-val encode_descriptor_suffix : Scip_types.descriptor_suffix -> Pbrt.Encoder.t -> unit
+val encode_descriptor_suffix :
+  Scip_types.descriptor_suffix -> Pbrt.Encoder.t -> unit
 (** [encode_descriptor_suffix v encoder] encodes [v] with the given [encoder] *)
 
 val encode_descriptor : Scip_types.descriptor -> Pbrt.Encoder.t -> unit
@@ -59,7 +61,6 @@ val encode_symbol_role : Scip_types.symbol_role -> Pbrt.Encoder.t -> unit
 
 val encode_language : Scip_types.language -> Pbrt.Encoder.t -> unit
 (** [encode_language v encoder] encodes [v] with the given [encoder] *)
-
 
 (** {2 Protobuf Decoding} *)
 

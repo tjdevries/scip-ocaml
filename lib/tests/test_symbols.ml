@@ -19,13 +19,15 @@ let test_local_symbol () =
     (Scip_symbol.new_local_symbol "a")
 
 let test_simple_scheme () =
+  let scheme = "a" in
   let package = Some (default_package ~manager:"b" ~name:"c" ~version:"d" ()) in
-  let suffix = Scip_types.Method in
-  let descriptors = [ default_descriptor ~name:"method" ~suffix () ] in
+  let name = "term" in
+  let suffix = Scip_types.Term in
+  let descriptors = [ default_descriptor ~name ~suffix () ] in
   Alcotest.(check testable_symbol)
     "simple symbol"
-    (Scip_types.default_symbol ~scheme:"a" ~package ~descriptors ())
-    (Scip_symbol.parse_symbol "a b c d method().")
+    (Scip_types.default_symbol ~scheme ~package ~descriptors ())
+    (Scip_symbol.parse_symbol "a b c d term.")
 
 (* Run it *)
 let () =

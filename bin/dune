@@ -2,7 +2,9 @@
  (public_name scip_ocaml)
  (name main)
  (libraries
-   scip_ocaml
-   stdune
-   compiler-libs.common
-   merlin-lib.analysis merlin-lib.query_protocol merlin-lib.query_commands))
+  scip_ocaml
+  stdune
+  compiler-libs.common
+  merlin-lib.analysis
+  merlin-lib.query_protocol
+  merlin-lib.query_commands))
