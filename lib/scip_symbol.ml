@@ -111,7 +111,7 @@ module ScipSymbol = struct
     let suffix = Method in
     let* name = ident <* lparen in
     let* disambiguator = take_while ident_char in
-    { name; suffix; disambiguator } |> return <* rparen <* char '.'
+    rparen <* char '.' >>= fun _ -> return { name; suffix; disambiguator }
   ;;
 
   (*  <parameter> ::= '(' <name> ')' *)
