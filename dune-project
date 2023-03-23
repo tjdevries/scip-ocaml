@@ -24,6 +24,8 @@
    stdune
    utop
    ocaml-protoc
+   angstrom
+   alcotest
    (merlin-lib (>= 4.8)))
  (tags
   (topics "to describe" your project)))

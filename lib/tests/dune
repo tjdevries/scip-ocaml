@@ -1,0 +1,4 @@
+(test
+ (name test_symbols)
+ (modules test_symbols)
+ (libraries alcotest scip_ocaml))

@@ -1,9 +1,11 @@
 [@@@alert "-unstable"]
 [@@@ocaml.warning "-26-27"]
 
+open Typedtree
+
 let () = print_endline "\nHello, World!\n"
 
-let handle_signature document (signature : Typedtree.signature) =
+let handle_signature document (signature : signature) =
   let open Stdune in
   let for_item _ = print_endline "yayaya" in
   List.iter signature.sig_items ~f:for_item;
@@ -30,14 +32,79 @@ let rec path_to_string (path : Path.t) =
   in
   p
 
-let handle_tree document (structure : Typedtree.structure) =
+let print_long_ident ident =
+  Format.asprintf "%a@." Pprintast.longident ident |> print_endline
+
+let print_type_expr (type_expr : Types.type_expr) =
+  Format.printf "  type: %a@." Printtyp.type_expr type_expr
+
+let get_type_of_expr (expr : expression) = print_endline "yayaya"
+
+let handle_tree document structure =
+  let expr sub t_expr =
+    let exp_desc = t_expr.exp_desc in
+    let _ =
+      match exp_desc with
+      | Texp_ident (path, loc, value) ->
+          Format.printf "    ident: %s\n" @@ path_to_string path
+      | Texp_constant c -> ()
+      | Texp_let (_, value, expr) ->
+          get_type_of_expr expr;
+          print_endline "  let"
+      (* { arg_label : arg_label; param : Ident.t; *)
+      (* cases : value case list; partial : partial; } *)
+      | Texp_function { arg_label; param; cases; partial } ->
+          Format.printf "  f: %s\n" @@ Ident.name param
+      | Texp_instvar (path, _, _) ->
+          Format.printf "    instvar: %s\n" @@ path_to_string path
+      | Texp_setinstvar (path, _, _, _) ->
+          Format.printf "    set instvar: %s\n" @@ path_to_string path
+      | Texp_construct (ident, desc, _) ->
+          print_long_ident ident.txt;
+          print_type_expr desc.cstr_res;
+          print_endline "  construct"
+      | Texp_apply (_, _)
+      | Texp_match (_, _, _)
+      | Texp_try (_, _)
+      | Texp_tuple _
+      | Texp_variant (_, _)
+      | Texp_record _
+      | Texp_field (_, _, _)
+      | Texp_setfield (_, _, _, _)
+      | Texp_array _
+      | Texp_ifthenelse (_, _, _)
+      | Texp_sequence (_, _)
+      | Texp_while (_, _)
+      | Texp_for (_, _, _, _, _, _)
+      | Texp_send (_, _)
+      | Texp_new (_, _, _)
+      | Texp_override (_, _)
+      | Texp_letmodule (_, _, _, _, _)
+      | Texp_letexception (_, _)
+      | Texp_assert _ | Texp_lazy _
+      | Texp_object (_, _)
+      | Texp_pack _ | Texp_letop _ | Texp_unreachable
+      | Texp_extension_constructor (_, _)
+      | Texp_open (_, _) ->
+          print_endline "    something else"
+    in
+    Tast_iterator.default_iterator.expr sub t_expr
+  in
   let iter =
     {
       Tast_iterator.default_iterator with
+      expr;
       value_binding =
         (fun this value ->
-          print_endline "value";
-          Tast_iterator.default_iterator.value_binding this value);
+          let ty = value.vb_expr in
+          let is_func =
+            match ty.exp_desc with Texp_function _ -> true | _ -> false
+          in
+          (* let x = ty.mb_id *)
+          Format.printf "  value: %a (%b)@." Printpat.top_pretty value.vb_pat
+            is_func;
+          this.pat this value.vb_pat;
+          this.expr this value.vb_expr);
       structure =
         (fun this structure ->
           print_endline "structure";
@@ -51,73 +118,25 @@ let handle_tree document (structure : Typedtree.structure) =
           let _ = item.str_env in
           let _ =
             match item.str_desc with
-            | Typedtree.Tstr_value (_, value) -> ()
-            | Typedtree.Tstr_eval (_, _)
-            | Typedtree.Tstr_primitive _
-            | Typedtree.Tstr_type (_, _)
-            | Typedtree.Tstr_typext _ | Typedtree.Tstr_exception _
-            | Typedtree.Tstr_module _ | Typedtree.Tstr_recmodule _
-            | Typedtree.Tstr_modtype _ | Typedtree.Tstr_open _
-            | Typedtree.Tstr_class _ | Typedtree.Tstr_class_type _
-            | Typedtree.Tstr_include _ | Typedtree.Tstr_attribute _ ->
+            | Tstr_value (_, value) -> ()
+            | Tstr_eval (_, _)
+            | Tstr_primitive _
+            | Tstr_type (_, _)
+            | Tstr_typext _ | Tstr_exception _ | Tstr_module _
+            | Tstr_recmodule _ | Tstr_modtype _ | Tstr_open _ | Tstr_class _
+            | Tstr_class_type _ | Tstr_include _ | Tstr_attribute _ ->
                 ()
           in
           Tast_iterator.default_iterator.structure_item this item);
-      expr =
-        (fun this expr ->
-          let _ =
-            match expr.exp_desc with
-            | Texp_ident (path, loc, value) ->
-                Format.printf "    ident: %s\n" @@ path_to_string path
-            | Texp_constant c -> ()
-            | Typedtree.Texp_let (_, _, _) -> print_endline "  let"
-            (* { arg_label : arg_label; param : Ident.t; *)
-            (* cases : value case list; partial : partial; } *)
-            | Typedtree.Texp_function f ->
-                let x = f.partial in
-                let y = f.arg_label in
-                print_endline "  f"
-            | Typedtree.Texp_instvar (path, _, _) ->
-                Format.printf "    instvar: %s\n" @@ path_to_string path
-            | Typedtree.Texp_setinstvar (path, _, _, _) ->
-                Format.printf "    set instvar: %s\n" @@ path_to_string path
-            | Typedtree.Texp_apply (_, _)
-            | Typedtree.Texp_match (_, _, _)
-            | Typedtree.Texp_try (_, _)
-            | Typedtree.Texp_tuple _
-            | Typedtree.Texp_construct (_, _, _)
-            | Typedtree.Texp_variant (_, _)
-            | Typedtree.Texp_record _
-            | Typedtree.Texp_field (_, _, _)
-            | Typedtree.Texp_setfield (_, _, _, _)
-            | Typedtree.Texp_array _
-            | Typedtree.Texp_ifthenelse (_, _, _)
-            | Typedtree.Texp_sequence (_, _)
-            | Typedtree.Texp_while (_, _)
-            | Typedtree.Texp_for (_, _, _, _, _, _)
-            | Typedtree.Texp_send (_, _)
-            | Typedtree.Texp_new (_, _, _)
-            | Typedtree.Texp_override (_, _)
-            | Typedtree.Texp_letmodule (_, _, _, _, _)
-            | Typedtree.Texp_letexception (_, _)
-            | Typedtree.Texp_assert _ | Typedtree.Texp_lazy _
-            | Typedtree.Texp_object (_, _)
-            | Typedtree.Texp_pack _ | Typedtree.Texp_letop _
-            | Typedtree.Texp_unreachable
-            | Typedtree.Texp_extension_constructor (_, _)
-            | Typedtree.Texp_open (_, _) ->
-                print_endline "    something else"
-          in
-          Tast_iterator.default_iterator.expr this expr);
     }
   in
   iter.structure iter structure;
 
   let open Scip_ocaml.Scip_types in
-  let handle_value document (value : Typedtree.value_binding) =
+  let handle_value document (value : value_binding) =
     let pat = value.vb_pat in
     match pat.pat_desc with
-    | Typedtree.Tpat_var (ident, loc) ->
+    | Tpat_var (ident, loc) ->
         let range = position_to_range loc.loc in
         let symbol = "local " ^ Ident.name ident in
         let symbol_roles = Int32.of_int 1 in
@@ -128,42 +147,42 @@ let handle_tree document (structure : Typedtree.structure) =
             default_occurrence ~range ~symbol ~symbol_roles ()
             :: document.occurrences;
         }
-    | Typedtree.Tpat_any ->
+    | Tpat_any ->
         print_endline "  got any";
         document
-    | Typedtree.Tpat_constant _ ->
+    | Tpat_constant _ ->
         print_endline "  got a constant";
         document
-    (* | Typedtree.Tpat_alias (_, _, _) -> _ *)
-    (* | Typedtree.Tpat_tuple _ -> _ *)
-    (* | Typedtree.Tpat_construct (_, _, _, _) -> _ *)
-    (* | Typedtree.Tpat_variant (_, _, _) -> _ *)
-    (* | Typedtree.Tpat_record (_, _) -> _ *)
-    (* | Typedtree.Tpat_array _ -> _ *)
-    (* | Typedtree.Tpat_lazy _ -> _ *)
-    (* | Typedtree.Tpat_or (_, _, _) -> _ *)
+    (* | Tpat_alias (_, _, _) -> _ *)
+    (* | Tpat_tuple _ -> _ *)
+    (* | Tpat_construct (_, _, _, _) -> _ *)
+    (* | Tpat_variant (_, _, _) -> _ *)
+    (* | Tpat_record (_, _) -> _ *)
+    (* | Tpat_array _ -> _ *)
+    (* | Tpat_lazy _ -> _ *)
+    (* | Tpat_or (_, _, _) -> _ *)
     | _ ->
         print_endline "  some other thing";
         document
   in
-  let for_item document (item : Typedtree.structure_item) =
+  let for_item document (item : structure_item) =
     print_endline "got structure_item";
     match item.str_desc with
-    (* | Typedtree.Tstr_value (_, value) -> *)
+    (* | Tstr_value (_, value) -> *)
     (*     List.fold_left value ~f:handle_value ~init:document *)
-    (* | Typedtree.Tstr_eval (_, _) -> _ *)
-    (* | Typedtree.Tstr_primitive _ -> _ *)
-    (* | Typedtree.Tstr_type (_, _) -> _ *)
-    (* | Typedtree.Tstr_typext _ -> _ *)
-    (* | Typedtree.Tstr_exception _ -> _ *)
-    (* | Typedtree.Tstr_module _ -> _ *)
-    (* | Typedtree.Tstr_recmodule _ -> _ *)
-    (* | Typedtree.Tstr_modtype _ -> _ *)
-    (* | Typedtree.Tstr_open _ -> _ *)
-    (* | Typedtree.Tstr_class _ -> _ *)
-    (* | Typedtree.Tstr_class_type _ -> _ *)
-    (* | Typedtree.Tstr_include _ -> _ *)
-    (* | Typedtree.Tstr_attribute _ -> _ *)
+    (* | Tstr_eval (_, _) -> _ *)
+    (* | Tstr_primitive _ -> _ *)
+    (* | Tstr_type (_, _) -> _ *)
+    (* | Tstr_typext _ -> _ *)
+    (* | Tstr_exception _ -> _ *)
+    (* | Tstr_module _ -> _ *)
+    (* | Tstr_recmodule _ -> _ *)
+    (* | Tstr_modtype _ -> _ *)
+    (* | Tstr_open _ -> _ *)
+    (* | Tstr_class _ -> _ *)
+    (* | Tstr_class_type _ -> _ *)
+    (* | Tstr_include _ -> _ *)
+    (* | Tstr_attribute _ -> _ *)
     | _ -> document
   in
 
