@@ -1,145 +1,149 @@
 [@@@ocaml.warning "-27-30-39"]
 
-type tool_info_mutable = {
-  mutable name : string;
-  mutable version : string;
-  mutable arguments : string list;
-}
+type tool_info_mutable =
+  { mutable name : string
+  ; mutable version : string
+  ; mutable arguments : string list
+  }
 
 let default_tool_info_mutable () : tool_info_mutable =
   { name = ""; version = ""; arguments = [] }
+;;
 
-type metadata_mutable = {
-  mutable version : Scip_types.protocol_version;
-  mutable tool_info : Scip_types.tool_info option;
-  mutable project_root : string;
-  mutable text_document_encoding : Scip_types.text_encoding;
-}
+type metadata_mutable =
+  { mutable version : Scip_types.protocol_version
+  ; mutable tool_info : Scip_types.tool_info option
+  ; mutable project_root : string
+  ; mutable text_document_encoding : Scip_types.text_encoding
+  }
 
 let default_metadata_mutable () : metadata_mutable =
-  {
-    version = Scip_types.default_protocol_version ();
-    tool_info = None;
-    project_root = "";
-    text_document_encoding = Scip_types.default_text_encoding ();
+  { version = Scip_types.default_protocol_version ()
+  ; tool_info = None
+  ; project_root = ""
+  ; text_document_encoding = Scip_types.default_text_encoding ()
   }
+;;
 
-type diagnostic_mutable = {
-  mutable severity : Scip_types.severity;
-  mutable code : string;
-  mutable message : string;
-  mutable source : string;
-  mutable tags : Scip_types.diagnostic_tag list;
-}
+type diagnostic_mutable =
+  { mutable severity : Scip_types.severity
+  ; mutable code : string
+  ; mutable message : string
+  ; mutable source : string
+  ; mutable tags : Scip_types.diagnostic_tag list
+  }
 
 let default_diagnostic_mutable () : diagnostic_mutable =
-  {
-    severity = Scip_types.default_severity ();
-    code = "";
-    message = "";
-    source = "";
-    tags = [];
+  { severity = Scip_types.default_severity ()
+  ; code = ""
+  ; message = ""
+  ; source = ""
+  ; tags = []
   }
+;;
 
-type occurrence_mutable = {
-  mutable range : int32 list;
-  mutable symbol : string;
-  mutable symbol_roles : int32;
-  mutable override_documentation : string list;
-  mutable syntax_kind : Scip_types.syntax_kind;
-  mutable diagnostics : Scip_types.diagnostic list;
-}
+type occurrence_mutable =
+  { mutable range : int32 list
+  ; mutable symbol : string
+  ; mutable symbol_roles : int32
+  ; mutable override_documentation : string list
+  ; mutable syntax_kind : Scip_types.syntax_kind
+  ; mutable diagnostics : Scip_types.diagnostic list
+  }
 
 let default_occurrence_mutable () : occurrence_mutable =
-  {
-    range = [];
-    symbol = "";
-    symbol_roles = 0l;
-    override_documentation = [];
-    syntax_kind = Scip_types.default_syntax_kind ();
-    diagnostics = [];
+  { range = []
+  ; symbol = ""
+  ; symbol_roles = 0l
+  ; override_documentation = []
+  ; syntax_kind = Scip_types.default_syntax_kind ()
+  ; diagnostics = []
   }
+;;
 
-type relationship_mutable = {
-  mutable symbol : string;
-  mutable is_reference : bool;
-  mutable is_implementation : bool;
-  mutable is_type_definition : bool;
-  mutable is_definition : bool;
-}
+type relationship_mutable =
+  { mutable symbol : string
+  ; mutable is_reference : bool
+  ; mutable is_implementation : bool
+  ; mutable is_type_definition : bool
+  ; mutable is_definition : bool
+  }
 
 let default_relationship_mutable () : relationship_mutable =
-  {
-    symbol = "";
-    is_reference = false;
-    is_implementation = false;
-    is_type_definition = false;
-    is_definition = false;
+  { symbol = ""
+  ; is_reference = false
+  ; is_implementation = false
+  ; is_type_definition = false
+  ; is_definition = false
   }
+;;
 
-type symbol_information_mutable = {
-  mutable symbol : string;
-  mutable documentation : string list;
-  mutable relationships : Scip_types.relationship list;
-}
+type symbol_information_mutable =
+  { mutable symbol : string
+  ; mutable documentation : string list
+  ; mutable relationships : Scip_types.relationship list
+  }
 
 let default_symbol_information_mutable () : symbol_information_mutable =
   { symbol = ""; documentation = []; relationships = [] }
+;;
 
-type document_mutable = {
-  mutable language : string;
-  mutable relative_path : string;
-  mutable occurrences : Scip_types.occurrence list;
-  mutable symbols : Scip_types.symbol_information list;
-}
+type document_mutable =
+  { mutable language : string
+  ; mutable relative_path : string
+  ; mutable occurrences : Scip_types.occurrence list
+  ; mutable symbols : Scip_types.symbol_information list
+  }
 
 let default_document_mutable () : document_mutable =
   { language = ""; relative_path = ""; occurrences = []; symbols = [] }
+;;
 
-type index_mutable = {
-  mutable metadata : Scip_types.metadata option;
-  mutable documents : Scip_types.document list;
-  mutable external_symbols : Scip_types.symbol_information list;
-}
+type index_mutable =
+  { mutable metadata : Scip_types.metadata option
+  ; mutable documents : Scip_types.document list
+  ; mutable external_symbols : Scip_types.symbol_information list
+  }
 
 let default_index_mutable () : index_mutable =
   { metadata = None; documents = []; external_symbols = [] }
+;;
 
-type package_mutable = {
-  mutable manager : string;
-  mutable name : string;
-  mutable version : string;
-}
+type package_mutable =
+  { mutable manager : string
+  ; mutable name : string
+  ; mutable version : string
+  }
 
 let default_package_mutable () : package_mutable =
   { manager = ""; name = ""; version = "" }
+;;
 
-type descriptor_mutable = {
-  mutable name : string;
-  mutable disambiguator : string;
-  mutable suffix : Scip_types.descriptor_suffix;
-}
-
-let default_descriptor_mutable () : descriptor_mutable =
-  {
-    name = "";
-    disambiguator = "";
-    suffix = Scip_types.default_descriptor_suffix ();
+type descriptor_mutable =
+  { mutable name : string
+  ; mutable disambiguator : string
+  ; mutable suffix : Scip_types.descriptor_suffix
   }
 
-type symbol_mutable = {
-  mutable scheme : string;
-  mutable package : Scip_types.package option;
-  mutable descriptors : Scip_types.descriptor list;
-}
+let default_descriptor_mutable () : descriptor_mutable =
+  { name = ""; disambiguator = ""; suffix = Scip_types.default_descriptor_suffix () }
+;;
+
+type symbol_mutable =
+  { mutable scheme : string
+  ; mutable package : Scip_types.package option
+  ; mutable descriptors : Scip_types.descriptor list
+  }
 
 let default_symbol_mutable () : symbol_mutable =
   { scheme = ""; package = None; descriptors = [] }
+;;
 
 let rec decode_protocol_version d =
   match Pbrt.Decoder.int_as_varint d with
   | 0 -> (Scip_types.Unspecified_protocol_version : Scip_types.protocol_version)
   | _ -> Pbrt.Decoder.malformed_variant "protocol_version"
+;;
 
 let rec decode_tool_info d =
   let v = default_tool_info_mutable () in
@@ -147,26 +151,22 @@ let rec decode_tool_info d =
   while !continue__ do
     match Pbrt.Decoder.key d with
     | None ->
-        v.arguments <- List.rev v.arguments;
-        continue__ := false
+      v.arguments <- List.rev v.arguments;
+      continue__ := false
     | Some (1, Pbrt.Bytes) -> v.name <- Pbrt.Decoder.string d
-    | Some (1, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(tool_info), field(1)" pk
+    | Some (1, pk) -> Pbrt.Decoder.unexpected_payload "Message(tool_info), field(1)" pk
     | Some (2, Pbrt.Bytes) -> v.version <- Pbrt.Decoder.string d
-    | Some (2, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(tool_info), field(2)" pk
-    | Some (3, Pbrt.Bytes) ->
-        v.arguments <- Pbrt.Decoder.string d :: v.arguments
-    | Some (3, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(tool_info), field(3)" pk
+    | Some (2, pk) -> Pbrt.Decoder.unexpected_payload "Message(tool_info), field(2)" pk
+    | Some (3, Pbrt.Bytes) -> v.arguments <- Pbrt.Decoder.string d :: v.arguments
+    | Some (3, pk) -> Pbrt.Decoder.unexpected_payload "Message(tool_info), field(3)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
-  ({
-     Scip_types.name = v.name;
-     Scip_types.version = v.version;
-     Scip_types.arguments = v.arguments;
+  ({ Scip_types.name = v.name
+   ; Scip_types.version = v.version
+   ; Scip_types.arguments = v.arguments
    }
     : Scip_types.tool_info)
+;;
 
 let rec decode_text_encoding d =
   match Pbrt.Decoder.int_as_varint d with
@@ -174,6 +174,7 @@ let rec decode_text_encoding d =
   | 1 -> (Scip_types.Utf8 : Scip_types.text_encoding)
   | 2 -> (Scip_types.Utf16 : Scip_types.text_encoding)
   | _ -> Pbrt.Decoder.malformed_variant "text_encoding"
+;;
 
 let rec decode_metadata d =
   let v = default_metadata_mutable () in
@@ -181,31 +182,26 @@ let rec decode_metadata d =
   while !continue__ do
     match Pbrt.Decoder.key d with
     | None ->
-        ();
-        continue__ := false
+      ();
+      continue__ := false
     | Some (1, Pbrt.Varint) -> v.version <- decode_protocol_version d
-    | Some (1, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(metadata), field(1)" pk
+    | Some (1, pk) -> Pbrt.Decoder.unexpected_payload "Message(metadata), field(1)" pk
     | Some (2, Pbrt.Bytes) ->
-        v.tool_info <- Some (decode_tool_info (Pbrt.Decoder.nested d))
-    | Some (2, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(metadata), field(2)" pk
+      v.tool_info <- Some (decode_tool_info (Pbrt.Decoder.nested d))
+    | Some (2, pk) -> Pbrt.Decoder.unexpected_payload "Message(metadata), field(2)" pk
     | Some (3, Pbrt.Bytes) -> v.project_root <- Pbrt.Decoder.string d
-    | Some (3, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(metadata), field(3)" pk
-    | Some (4, Pbrt.Varint) ->
-        v.text_document_encoding <- decode_text_encoding d
-    | Some (4, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(metadata), field(4)" pk
+    | Some (3, pk) -> Pbrt.Decoder.unexpected_payload "Message(metadata), field(3)" pk
+    | Some (4, Pbrt.Varint) -> v.text_document_encoding <- decode_text_encoding d
+    | Some (4, pk) -> Pbrt.Decoder.unexpected_payload "Message(metadata), field(4)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
-  ({
-     Scip_types.version = v.version;
-     Scip_types.tool_info = v.tool_info;
-     Scip_types.project_root = v.project_root;
-     Scip_types.text_document_encoding = v.text_document_encoding;
+  ({ Scip_types.version = v.version
+   ; Scip_types.tool_info = v.tool_info
+   ; Scip_types.project_root = v.project_root
+   ; Scip_types.text_document_encoding = v.text_document_encoding
    }
     : Scip_types.metadata)
+;;
 
 let rec decode_syntax_kind d =
   match Pbrt.Decoder.int_as_varint d with
@@ -249,6 +245,7 @@ let rec decode_syntax_kind d =
   | 35 -> (Scip_types.Tag_attribute : Scip_types.syntax_kind)
   | 36 -> (Scip_types.Tag_delimiter : Scip_types.syntax_kind)
   | _ -> Pbrt.Decoder.malformed_variant "syntax_kind"
+;;
 
 let rec decode_severity d =
   match Pbrt.Decoder.int_as_varint d with
@@ -258,6 +255,7 @@ let rec decode_severity d =
   | 3 -> (Scip_types.Information : Scip_types.severity)
   | 4 -> (Scip_types.Hint : Scip_types.severity)
   | _ -> Pbrt.Decoder.malformed_variant "severity"
+;;
 
 let rec decode_diagnostic_tag d =
   match Pbrt.Decoder.int_as_varint d with
@@ -265,6 +263,7 @@ let rec decode_diagnostic_tag d =
   | 1 -> (Scip_types.Unnecessary : Scip_types.diagnostic_tag)
   | 2 -> (Scip_types.Deprecated : Scip_types.diagnostic_tag)
   | _ -> Pbrt.Decoder.malformed_variant "diagnostic_tag"
+;;
 
 let rec decode_diagnostic d =
   let v = default_diagnostic_mutable () in
@@ -272,33 +271,28 @@ let rec decode_diagnostic d =
   while !continue__ do
     match Pbrt.Decoder.key d with
     | None ->
-        v.tags <- List.rev v.tags;
-        continue__ := false
+      v.tags <- List.rev v.tags;
+      continue__ := false
     | Some (1, Pbrt.Varint) -> v.severity <- decode_severity d
-    | Some (1, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(diagnostic), field(1)" pk
+    | Some (1, pk) -> Pbrt.Decoder.unexpected_payload "Message(diagnostic), field(1)" pk
     | Some (2, Pbrt.Bytes) -> v.code <- Pbrt.Decoder.string d
-    | Some (2, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(diagnostic), field(2)" pk
+    | Some (2, pk) -> Pbrt.Decoder.unexpected_payload "Message(diagnostic), field(2)" pk
     | Some (3, Pbrt.Bytes) -> v.message <- Pbrt.Decoder.string d
-    | Some (3, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(diagnostic), field(3)" pk
+    | Some (3, pk) -> Pbrt.Decoder.unexpected_payload "Message(diagnostic), field(3)" pk
     | Some (4, Pbrt.Bytes) -> v.source <- Pbrt.Decoder.string d
-    | Some (4, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(diagnostic), field(4)" pk
+    | Some (4, pk) -> Pbrt.Decoder.unexpected_payload "Message(diagnostic), field(4)" pk
     | Some (5, Pbrt.Varint) -> v.tags <- decode_diagnostic_tag d :: v.tags
-    | Some (5, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(diagnostic), field(5)" pk
+    | Some (5, pk) -> Pbrt.Decoder.unexpected_payload "Message(diagnostic), field(5)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
-  ({
-     Scip_types.severity = v.severity;
-     Scip_types.code = v.code;
-     Scip_types.message = v.message;
-     Scip_types.source = v.source;
-     Scip_types.tags = v.tags;
+  ({ Scip_types.severity = v.severity
+   ; Scip_types.code = v.code
+   ; Scip_types.message = v.message
+   ; Scip_types.source = v.source
+   ; Scip_types.tags = v.tags
    }
     : Scip_types.diagnostic)
+;;
 
 let rec decode_occurrence d =
   let v = default_occurrence_mutable () in
@@ -306,47 +300,37 @@ let rec decode_occurrence d =
   while !continue__ do
     match Pbrt.Decoder.key d with
     | None ->
-        v.diagnostics <- List.rev v.diagnostics;
-        v.override_documentation <- List.rev v.override_documentation;
-        v.range <- List.rev v.range;
-        continue__ := false
+      v.diagnostics <- List.rev v.diagnostics;
+      v.override_documentation <- List.rev v.override_documentation;
+      v.range <- List.rev v.range;
+      continue__ := false
     | Some (1, Pbrt.Bytes) ->
-        v.range <-
-          Pbrt.Decoder.packed_fold
-            (fun l d -> Pbrt.Decoder.int32_as_varint d :: l)
-            [] d
-    | Some (1, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(occurrence), field(1)" pk
+      v.range
+        <- Pbrt.Decoder.packed_fold (fun l d -> Pbrt.Decoder.int32_as_varint d :: l) [] d
+    | Some (1, pk) -> Pbrt.Decoder.unexpected_payload "Message(occurrence), field(1)" pk
     | Some (2, Pbrt.Bytes) -> v.symbol <- Pbrt.Decoder.string d
-    | Some (2, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(occurrence), field(2)" pk
+    | Some (2, pk) -> Pbrt.Decoder.unexpected_payload "Message(occurrence), field(2)" pk
     | Some (3, Pbrt.Varint) -> v.symbol_roles <- Pbrt.Decoder.int32_as_varint d
-    | Some (3, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(occurrence), field(3)" pk
+    | Some (3, pk) -> Pbrt.Decoder.unexpected_payload "Message(occurrence), field(3)" pk
     | Some (4, Pbrt.Bytes) ->
-        v.override_documentation <-
-          Pbrt.Decoder.string d :: v.override_documentation
-    | Some (4, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(occurrence), field(4)" pk
+      v.override_documentation <- Pbrt.Decoder.string d :: v.override_documentation
+    | Some (4, pk) -> Pbrt.Decoder.unexpected_payload "Message(occurrence), field(4)" pk
     | Some (5, Pbrt.Varint) -> v.syntax_kind <- decode_syntax_kind d
-    | Some (5, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(occurrence), field(5)" pk
+    | Some (5, pk) -> Pbrt.Decoder.unexpected_payload "Message(occurrence), field(5)" pk
     | Some (6, Pbrt.Bytes) ->
-        v.diagnostics <-
-          decode_diagnostic (Pbrt.Decoder.nested d) :: v.diagnostics
-    | Some (6, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(occurrence), field(6)" pk
+      v.diagnostics <- decode_diagnostic (Pbrt.Decoder.nested d) :: v.diagnostics
+    | Some (6, pk) -> Pbrt.Decoder.unexpected_payload "Message(occurrence), field(6)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
-  ({
-     Scip_types.range = v.range;
-     Scip_types.symbol = v.symbol;
-     Scip_types.symbol_roles = v.symbol_roles;
-     Scip_types.override_documentation = v.override_documentation;
-     Scip_types.syntax_kind = v.syntax_kind;
-     Scip_types.diagnostics = v.diagnostics;
+  ({ Scip_types.range = v.range
+   ; Scip_types.symbol = v.symbol
+   ; Scip_types.symbol_roles = v.symbol_roles
+   ; Scip_types.override_documentation = v.override_documentation
+   ; Scip_types.syntax_kind = v.syntax_kind
+   ; Scip_types.diagnostics = v.diagnostics
    }
     : Scip_types.occurrence)
+;;
 
 let rec decode_relationship d =
   let v = default_relationship_mutable () in
@@ -354,33 +338,28 @@ let rec decode_relationship d =
   while !continue__ do
     match Pbrt.Decoder.key d with
     | None ->
-        ();
-        continue__ := false
+      ();
+      continue__ := false
     | Some (1, Pbrt.Bytes) -> v.symbol <- Pbrt.Decoder.string d
-    | Some (1, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(relationship), field(1)" pk
+    | Some (1, pk) -> Pbrt.Decoder.unexpected_payload "Message(relationship), field(1)" pk
     | Some (2, Pbrt.Varint) -> v.is_reference <- Pbrt.Decoder.bool d
-    | Some (2, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(relationship), field(2)" pk
+    | Some (2, pk) -> Pbrt.Decoder.unexpected_payload "Message(relationship), field(2)" pk
     | Some (3, Pbrt.Varint) -> v.is_implementation <- Pbrt.Decoder.bool d
-    | Some (3, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(relationship), field(3)" pk
+    | Some (3, pk) -> Pbrt.Decoder.unexpected_payload "Message(relationship), field(3)" pk
     | Some (4, Pbrt.Varint) -> v.is_type_definition <- Pbrt.Decoder.bool d
-    | Some (4, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(relationship), field(4)" pk
+    | Some (4, pk) -> Pbrt.Decoder.unexpected_payload "Message(relationship), field(4)" pk
     | Some (5, Pbrt.Varint) -> v.is_definition <- Pbrt.Decoder.bool d
-    | Some (5, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(relationship), field(5)" pk
+    | Some (5, pk) -> Pbrt.Decoder.unexpected_payload "Message(relationship), field(5)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
-  ({
-     Scip_types.symbol = v.symbol;
-     Scip_types.is_reference = v.is_reference;
-     Scip_types.is_implementation = v.is_implementation;
-     Scip_types.is_type_definition = v.is_type_definition;
-     Scip_types.is_definition = v.is_definition;
+  ({ Scip_types.symbol = v.symbol
+   ; Scip_types.is_reference = v.is_reference
+   ; Scip_types.is_implementation = v.is_implementation
+   ; Scip_types.is_type_definition = v.is_type_definition
+   ; Scip_types.is_definition = v.is_definition
    }
     : Scip_types.relationship)
+;;
 
 let rec decode_symbol_information d =
   let v = default_symbol_information_mutable () in
@@ -388,32 +367,27 @@ let rec decode_symbol_information d =
   while !continue__ do
     match Pbrt.Decoder.key d with
     | None ->
-        v.relationships <- List.rev v.relationships;
-        v.documentation <- List.rev v.documentation;
-        continue__ := false
+      v.relationships <- List.rev v.relationships;
+      v.documentation <- List.rev v.documentation;
+      continue__ := false
     | Some (1, Pbrt.Bytes) -> v.symbol <- Pbrt.Decoder.string d
     | Some (1, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(symbol_information), field(1)"
-          pk
-    | Some (3, Pbrt.Bytes) ->
-        v.documentation <- Pbrt.Decoder.string d :: v.documentation
+      Pbrt.Decoder.unexpected_payload "Message(symbol_information), field(1)" pk
+    | Some (3, Pbrt.Bytes) -> v.documentation <- Pbrt.Decoder.string d :: v.documentation
     | Some (3, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(symbol_information), field(3)"
-          pk
+      Pbrt.Decoder.unexpected_payload "Message(symbol_information), field(3)" pk
     | Some (4, Pbrt.Bytes) ->
-        v.relationships <-
-          decode_relationship (Pbrt.Decoder.nested d) :: v.relationships
+      v.relationships <- decode_relationship (Pbrt.Decoder.nested d) :: v.relationships
     | Some (4, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(symbol_information), field(4)"
-          pk
+      Pbrt.Decoder.unexpected_payload "Message(symbol_information), field(4)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
-  ({
-     Scip_types.symbol = v.symbol;
-     Scip_types.documentation = v.documentation;
-     Scip_types.relationships = v.relationships;
+  ({ Scip_types.symbol = v.symbol
+   ; Scip_types.documentation = v.documentation
+   ; Scip_types.relationships = v.relationships
    }
     : Scip_types.symbol_information)
+;;
 
 let rec decode_document d =
   let v = default_document_mutable () in
@@ -421,34 +395,28 @@ let rec decode_document d =
   while !continue__ do
     match Pbrt.Decoder.key d with
     | None ->
-        v.symbols <- List.rev v.symbols;
-        v.occurrences <- List.rev v.occurrences;
-        continue__ := false
+      v.symbols <- List.rev v.symbols;
+      v.occurrences <- List.rev v.occurrences;
+      continue__ := false
     | Some (4, Pbrt.Bytes) -> v.language <- Pbrt.Decoder.string d
-    | Some (4, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(document), field(4)" pk
+    | Some (4, pk) -> Pbrt.Decoder.unexpected_payload "Message(document), field(4)" pk
     | Some (1, Pbrt.Bytes) -> v.relative_path <- Pbrt.Decoder.string d
-    | Some (1, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(document), field(1)" pk
+    | Some (1, pk) -> Pbrt.Decoder.unexpected_payload "Message(document), field(1)" pk
     | Some (2, Pbrt.Bytes) ->
-        v.occurrences <-
-          decode_occurrence (Pbrt.Decoder.nested d) :: v.occurrences
-    | Some (2, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(document), field(2)" pk
+      v.occurrences <- decode_occurrence (Pbrt.Decoder.nested d) :: v.occurrences
+    | Some (2, pk) -> Pbrt.Decoder.unexpected_payload "Message(document), field(2)" pk
     | Some (3, Pbrt.Bytes) ->
-        v.symbols <-
-          decode_symbol_information (Pbrt.Decoder.nested d) :: v.symbols
-    | Some (3, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(document), field(3)" pk
+      v.symbols <- decode_symbol_information (Pbrt.Decoder.nested d) :: v.symbols
+    | Some (3, pk) -> Pbrt.Decoder.unexpected_payload "Message(document), field(3)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
-  ({
-     Scip_types.language = v.language;
-     Scip_types.relative_path = v.relative_path;
-     Scip_types.occurrences = v.occurrences;
-     Scip_types.symbols = v.symbols;
+  ({ Scip_types.language = v.language
+   ; Scip_types.relative_path = v.relative_path
+   ; Scip_types.occurrences = v.occurrences
+   ; Scip_types.symbols = v.symbols
    }
     : Scip_types.document)
+;;
 
 let rec decode_index d =
   let v = default_index_mutable () in
@@ -456,31 +424,26 @@ let rec decode_index d =
   while !continue__ do
     match Pbrt.Decoder.key d with
     | None ->
-        v.external_symbols <- List.rev v.external_symbols;
-        v.documents <- List.rev v.documents;
-        continue__ := false
-    | Some (1, Pbrt.Bytes) ->
-        v.metadata <- Some (decode_metadata (Pbrt.Decoder.nested d))
-    | Some (1, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(index), field(1)" pk
+      v.external_symbols <- List.rev v.external_symbols;
+      v.documents <- List.rev v.documents;
+      continue__ := false
+    | Some (1, Pbrt.Bytes) -> v.metadata <- Some (decode_metadata (Pbrt.Decoder.nested d))
+    | Some (1, pk) -> Pbrt.Decoder.unexpected_payload "Message(index), field(1)" pk
     | Some (2, Pbrt.Bytes) ->
-        v.documents <- decode_document (Pbrt.Decoder.nested d) :: v.documents
-    | Some (2, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(index), field(2)" pk
+      v.documents <- decode_document (Pbrt.Decoder.nested d) :: v.documents
+    | Some (2, pk) -> Pbrt.Decoder.unexpected_payload "Message(index), field(2)" pk
     | Some (3, Pbrt.Bytes) ->
-        v.external_symbols <-
-          decode_symbol_information (Pbrt.Decoder.nested d)
-          :: v.external_symbols
-    | Some (3, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(index), field(3)" pk
+      v.external_symbols
+        <- decode_symbol_information (Pbrt.Decoder.nested d) :: v.external_symbols
+    | Some (3, pk) -> Pbrt.Decoder.unexpected_payload "Message(index), field(3)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
-  ({
-     Scip_types.metadata = v.metadata;
-     Scip_types.documents = v.documents;
-     Scip_types.external_symbols = v.external_symbols;
+  ({ Scip_types.metadata = v.metadata
+   ; Scip_types.documents = v.documents
+   ; Scip_types.external_symbols = v.external_symbols
    }
     : Scip_types.index)
+;;
 
 let rec decode_package d =
   let v = default_package_mutable () in
@@ -488,25 +451,22 @@ let rec decode_package d =
   while !continue__ do
     match Pbrt.Decoder.key d with
     | None ->
-        ();
-        continue__ := false
+      ();
+      continue__ := false
     | Some (1, Pbrt.Bytes) -> v.manager <- Pbrt.Decoder.string d
-    | Some (1, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(package), field(1)" pk
+    | Some (1, pk) -> Pbrt.Decoder.unexpected_payload "Message(package), field(1)" pk
     | Some (2, Pbrt.Bytes) -> v.name <- Pbrt.Decoder.string d
-    | Some (2, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(package), field(2)" pk
+    | Some (2, pk) -> Pbrt.Decoder.unexpected_payload "Message(package), field(2)" pk
     | Some (3, Pbrt.Bytes) -> v.version <- Pbrt.Decoder.string d
-    | Some (3, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(package), field(3)" pk
+    | Some (3, pk) -> Pbrt.Decoder.unexpected_payload "Message(package), field(3)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
-  ({
-     Scip_types.manager = v.manager;
-     Scip_types.name = v.name;
-     Scip_types.version = v.version;
+  ({ Scip_types.manager = v.manager
+   ; Scip_types.name = v.name
+   ; Scip_types.version = v.version
    }
     : Scip_types.package)
+;;
 
 let rec decode_descriptor_suffix d =
   match Pbrt.Decoder.int_as_varint d with
@@ -522,6 +482,7 @@ let rec decode_descriptor_suffix d =
   | 7 -> (Scip_types.Meta : Scip_types.descriptor_suffix)
   | 8 -> (Scip_types.Local : Scip_types.descriptor_suffix)
   | _ -> Pbrt.Decoder.malformed_variant "descriptor_suffix"
+;;
 
 let rec decode_descriptor d =
   let v = default_descriptor_mutable () in
@@ -529,25 +490,22 @@ let rec decode_descriptor d =
   while !continue__ do
     match Pbrt.Decoder.key d with
     | None ->
-        ();
-        continue__ := false
+      ();
+      continue__ := false
     | Some (1, Pbrt.Bytes) -> v.name <- Pbrt.Decoder.string d
-    | Some (1, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(descriptor), field(1)" pk
+    | Some (1, pk) -> Pbrt.Decoder.unexpected_payload "Message(descriptor), field(1)" pk
     | Some (2, Pbrt.Bytes) -> v.disambiguator <- Pbrt.Decoder.string d
-    | Some (2, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(descriptor), field(2)" pk
+    | Some (2, pk) -> Pbrt.Decoder.unexpected_payload "Message(descriptor), field(2)" pk
     | Some (3, Pbrt.Varint) -> v.suffix <- decode_descriptor_suffix d
-    | Some (3, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(descriptor), field(3)" pk
+    | Some (3, pk) -> Pbrt.Decoder.unexpected_payload "Message(descriptor), field(3)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
-  ({
-     Scip_types.name = v.name;
-     Scip_types.disambiguator = v.disambiguator;
-     Scip_types.suffix = v.suffix;
+  ({ Scip_types.name = v.name
+   ; Scip_types.disambiguator = v.disambiguator
+   ; Scip_types.suffix = v.suffix
    }
     : Scip_types.descriptor)
+;;
 
 let rec decode_symbol d =
   let v = default_symbol_mutable () in
@@ -555,28 +513,23 @@ let rec decode_symbol d =
   while !continue__ do
     match Pbrt.Decoder.key d with
     | None ->
-        v.descriptors <- List.rev v.descriptors;
-        continue__ := false
+      v.descriptors <- List.rev v.descriptors;
+      continue__ := false
     | Some (1, Pbrt.Bytes) -> v.scheme <- Pbrt.Decoder.string d
-    | Some (1, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(symbol), field(1)" pk
-    | Some (2, Pbrt.Bytes) ->
-        v.package <- Some (decode_package (Pbrt.Decoder.nested d))
-    | Some (2, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(symbol), field(2)" pk
+    | Some (1, pk) -> Pbrt.Decoder.unexpected_payload "Message(symbol), field(1)" pk
+    | Some (2, Pbrt.Bytes) -> v.package <- Some (decode_package (Pbrt.Decoder.nested d))
+    | Some (2, pk) -> Pbrt.Decoder.unexpected_payload "Message(symbol), field(2)" pk
     | Some (3, Pbrt.Bytes) ->
-        v.descriptors <-
-          decode_descriptor (Pbrt.Decoder.nested d) :: v.descriptors
-    | Some (3, pk) ->
-        Pbrt.Decoder.unexpected_payload "Message(symbol), field(3)" pk
+      v.descriptors <- decode_descriptor (Pbrt.Decoder.nested d) :: v.descriptors
+    | Some (3, pk) -> Pbrt.Decoder.unexpected_payload "Message(symbol), field(3)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
-  ({
-     Scip_types.scheme = v.scheme;
-     Scip_types.package = v.package;
-     Scip_types.descriptors = v.descriptors;
+  ({ Scip_types.scheme = v.scheme
+   ; Scip_types.package = v.package
+   ; Scip_types.descriptors = v.descriptors
    }
     : Scip_types.symbol)
+;;
 
 let rec decode_symbol_role d =
   match Pbrt.Decoder.int_as_varint d with
@@ -588,6 +541,7 @@ let rec decode_symbol_role d =
   | 16 -> (Scip_types.Generated : Scip_types.symbol_role)
   | 32 -> (Scip_types.Test : Scip_types.symbol_role)
   | _ -> Pbrt.Decoder.malformed_variant "symbol_role"
+;;
 
 let rec decode_language d =
   match Pbrt.Decoder.int_as_varint d with
@@ -686,11 +640,12 @@ let rec decode_language d =
   | 74 -> (Scip_types.Yaml : Scip_types.language)
   | 38 -> (Scip_types.Zig : Scip_types.language)
   | _ -> Pbrt.Decoder.malformed_variant "language"
+;;
 
 let rec encode_protocol_version (v : Scip_types.protocol_version) encoder =
   match v with
-  | Scip_types.Unspecified_protocol_version ->
-      Pbrt.Encoder.int_as_varint 0 encoder
+  | Scip_types.Unspecified_protocol_version -> Pbrt.Encoder.int_as_varint 0 encoder
+;;
 
 let rec encode_tool_info (v : Scip_types.tool_info) encoder =
   Pbrt.Encoder.key (1, Pbrt.Bytes) encoder;
@@ -703,26 +658,29 @@ let rec encode_tool_info (v : Scip_types.tool_info) encoder =
       Pbrt.Encoder.string x encoder)
     v.Scip_types.arguments;
   ()
+;;
 
 let rec encode_text_encoding (v : Scip_types.text_encoding) encoder =
   match v with
   | Scip_types.Unspecified_text_encoding -> Pbrt.Encoder.int_as_varint 0 encoder
   | Scip_types.Utf8 -> Pbrt.Encoder.int_as_varint 1 encoder
   | Scip_types.Utf16 -> Pbrt.Encoder.int_as_varint 2 encoder
+;;
 
 let rec encode_metadata (v : Scip_types.metadata) encoder =
   Pbrt.Encoder.key (1, Pbrt.Varint) encoder;
   encode_protocol_version v.Scip_types.version encoder;
   (match v.Scip_types.tool_info with
-  | Some x ->
-      Pbrt.Encoder.key (2, Pbrt.Bytes) encoder;
-      Pbrt.Encoder.nested (encode_tool_info x) encoder
-  | None -> ());
+   | Some x ->
+     Pbrt.Encoder.key (2, Pbrt.Bytes) encoder;
+     Pbrt.Encoder.nested (encode_tool_info x) encoder
+   | None -> ());
   Pbrt.Encoder.key (3, Pbrt.Bytes) encoder;
   Pbrt.Encoder.string v.Scip_types.project_root encoder;
   Pbrt.Encoder.key (4, Pbrt.Varint) encoder;
   encode_text_encoding v.Scip_types.text_document_encoding encoder;
   ()
+;;
 
 let rec encode_syntax_kind (v : Scip_types.syntax_kind) encoder =
   match v with
@@ -737,19 +695,16 @@ let rec encode_syntax_kind (v : Scip_types.syntax_kind) encoder =
   | Scip_types.Identifier_builtin -> Pbrt.Encoder.int_as_varint 7 encoder
   | Scip_types.Identifier_null -> Pbrt.Encoder.int_as_varint 8 encoder
   | Scip_types.Identifier_constant -> Pbrt.Encoder.int_as_varint 9 encoder
-  | Scip_types.Identifier_mutable_global ->
-      Pbrt.Encoder.int_as_varint 10 encoder
+  | Scip_types.Identifier_mutable_global -> Pbrt.Encoder.int_as_varint 10 encoder
   | Scip_types.Identifier_parameter -> Pbrt.Encoder.int_as_varint 11 encoder
   | Scip_types.Identifier_local -> Pbrt.Encoder.int_as_varint 12 encoder
   | Scip_types.Identifier_shadowed -> Pbrt.Encoder.int_as_varint 13 encoder
   | Scip_types.Identifier_namespace -> Pbrt.Encoder.int_as_varint 14 encoder
   | Scip_types.Identifier_module -> Pbrt.Encoder.int_as_varint 14 encoder
   | Scip_types.Identifier_function -> Pbrt.Encoder.int_as_varint 15 encoder
-  | Scip_types.Identifier_function_definition ->
-      Pbrt.Encoder.int_as_varint 16 encoder
+  | Scip_types.Identifier_function_definition -> Pbrt.Encoder.int_as_varint 16 encoder
   | Scip_types.Identifier_macro -> Pbrt.Encoder.int_as_varint 17 encoder
-  | Scip_types.Identifier_macro_definition ->
-      Pbrt.Encoder.int_as_varint 18 encoder
+  | Scip_types.Identifier_macro_definition -> Pbrt.Encoder.int_as_varint 18 encoder
   | Scip_types.Identifier_type -> Pbrt.Encoder.int_as_varint 19 encoder
   | Scip_types.Identifier_builtin_type -> Pbrt.Encoder.int_as_varint 20 encoder
   | Scip_types.Identifier_attribute -> Pbrt.Encoder.int_as_varint 21 encoder
@@ -768,6 +723,7 @@ let rec encode_syntax_kind (v : Scip_types.syntax_kind) encoder =
   | Scip_types.Tag -> Pbrt.Encoder.int_as_varint 34 encoder
   | Scip_types.Tag_attribute -> Pbrt.Encoder.int_as_varint 35 encoder
   | Scip_types.Tag_delimiter -> Pbrt.Encoder.int_as_varint 36 encoder
+;;
 
 let rec encode_severity (v : Scip_types.severity) encoder =
   match v with
@@ -776,13 +732,14 @@ let rec encode_severity (v : Scip_types.severity) encoder =
   | Scip_types.Warning -> Pbrt.Encoder.int_as_varint 2 encoder
   | Scip_types.Information -> Pbrt.Encoder.int_as_varint 3 encoder
   | Scip_types.Hint -> Pbrt.Encoder.int_as_varint 4 encoder
+;;
 
 let rec encode_diagnostic_tag (v : Scip_types.diagnostic_tag) encoder =
   match v with
-  | Scip_types.Unspecified_diagnostic_tag ->
-      Pbrt.Encoder.int_as_varint 0 encoder
+  | Scip_types.Unspecified_diagnostic_tag -> Pbrt.Encoder.int_as_varint 0 encoder
   | Scip_types.Unnecessary -> Pbrt.Encoder.int_as_varint 1 encoder
   | Scip_types.Deprecated -> Pbrt.Encoder.int_as_varint 2 encoder
+;;
 
 let rec encode_diagnostic (v : Scip_types.diagnostic) encoder =
   Pbrt.Encoder.key (1, Pbrt.Varint) encoder;
@@ -799,14 +756,13 @@ let rec encode_diagnostic (v : Scip_types.diagnostic) encoder =
       encode_diagnostic_tag x encoder)
     v.Scip_types.tags;
   ()
+;;
 
 let rec encode_occurrence (v : Scip_types.occurrence) encoder =
   Pbrt.Encoder.key (1, Pbrt.Bytes) encoder;
   Pbrt.Encoder.nested
     (fun encoder ->
-      List.iter
-        (fun x -> Pbrt.Encoder.int32_as_varint x encoder)
-        v.Scip_types.range)
+      List.iter (fun x -> Pbrt.Encoder.int32_as_varint x encoder) v.Scip_types.range)
     encoder;
   Pbrt.Encoder.key (2, Pbrt.Bytes) encoder;
   Pbrt.Encoder.string v.Scip_types.symbol encoder;
@@ -825,6 +781,7 @@ let rec encode_occurrence (v : Scip_types.occurrence) encoder =
       Pbrt.Encoder.nested (encode_diagnostic x) encoder)
     v.Scip_types.diagnostics;
   ()
+;;
 
 let rec encode_relationship (v : Scip_types.relationship) encoder =
   Pbrt.Encoder.key (1, Pbrt.Bytes) encoder;
@@ -838,6 +795,7 @@ let rec encode_relationship (v : Scip_types.relationship) encoder =
   Pbrt.Encoder.key (5, Pbrt.Varint) encoder;
   Pbrt.Encoder.bool v.Scip_types.is_definition encoder;
   ()
+;;
 
 let rec encode_symbol_information (v : Scip_types.symbol_information) encoder =
   Pbrt.Encoder.key (1, Pbrt.Bytes) encoder;
@@ -853,6 +811,7 @@ let rec encode_symbol_information (v : Scip_types.symbol_information) encoder =
       Pbrt.Encoder.nested (encode_relationship x) encoder)
     v.Scip_types.relationships;
   ()
+;;
 
 let rec encode_document (v : Scip_types.document) encoder =
   Pbrt.Encoder.key (4, Pbrt.Bytes) encoder;
@@ -870,13 +829,14 @@ let rec encode_document (v : Scip_types.document) encoder =
       Pbrt.Encoder.nested (encode_symbol_information x) encoder)
     v.Scip_types.symbols;
   ()
+;;
 
 let rec encode_index (v : Scip_types.index) encoder =
   (match v.Scip_types.metadata with
-  | Some x ->
-      Pbrt.Encoder.key (1, Pbrt.Bytes) encoder;
-      Pbrt.Encoder.nested (encode_metadata x) encoder
-  | None -> ());
+   | Some x ->
+     Pbrt.Encoder.key (1, Pbrt.Bytes) encoder;
+     Pbrt.Encoder.nested (encode_metadata x) encoder
+   | None -> ());
   List.iter
     (fun x ->
       Pbrt.Encoder.key (2, Pbrt.Bytes) encoder;
@@ -888,6 +848,7 @@ let rec encode_index (v : Scip_types.index) encoder =
       Pbrt.Encoder.nested (encode_symbol_information x) encoder)
     v.Scip_types.external_symbols;
   ()
+;;
 
 let rec encode_package (v : Scip_types.package) encoder =
   Pbrt.Encoder.key (1, Pbrt.Bytes) encoder;
@@ -897,6 +858,7 @@ let rec encode_package (v : Scip_types.package) encoder =
   Pbrt.Encoder.key (3, Pbrt.Bytes) encoder;
   Pbrt.Encoder.string v.Scip_types.version encoder;
   ()
+;;
 
 let rec encode_descriptor_suffix (v : Scip_types.descriptor_suffix) encoder =
   match v with
@@ -911,6 +873,7 @@ let rec encode_descriptor_suffix (v : Scip_types.descriptor_suffix) encoder =
   | Scip_types.Macro -> Pbrt.Encoder.int_as_varint 9 encoder
   | Scip_types.Meta -> Pbrt.Encoder.int_as_varint 7 encoder
   | Scip_types.Local -> Pbrt.Encoder.int_as_varint 8 encoder
+;;
 
 let rec encode_descriptor (v : Scip_types.descriptor) encoder =
   Pbrt.Encoder.key (1, Pbrt.Bytes) encoder;
@@ -920,21 +883,23 @@ let rec encode_descriptor (v : Scip_types.descriptor) encoder =
   Pbrt.Encoder.key (3, Pbrt.Varint) encoder;
   encode_descriptor_suffix v.Scip_types.suffix encoder;
   ()
+;;
 
 let rec encode_symbol (v : Scip_types.symbol) encoder =
   Pbrt.Encoder.key (1, Pbrt.Bytes) encoder;
   Pbrt.Encoder.string v.Scip_types.scheme encoder;
   (match v.Scip_types.package with
-  | Some x ->
-      Pbrt.Encoder.key (2, Pbrt.Bytes) encoder;
-      Pbrt.Encoder.nested (encode_package x) encoder
-  | None -> ());
+   | Some x ->
+     Pbrt.Encoder.key (2, Pbrt.Bytes) encoder;
+     Pbrt.Encoder.nested (encode_package x) encoder
+   | None -> ());
   List.iter
     (fun x ->
       Pbrt.Encoder.key (3, Pbrt.Bytes) encoder;
       Pbrt.Encoder.nested (encode_descriptor x) encoder)
     v.Scip_types.descriptors;
   ()
+;;
 
 let rec encode_symbol_role (v : Scip_types.symbol_role) encoder =
   match v with
@@ -945,6 +910,7 @@ let rec encode_symbol_role (v : Scip_types.symbol_role) encoder =
   | Scip_types.Read_access -> Pbrt.Encoder.int_as_varint 8 encoder
   | Scip_types.Generated -> Pbrt.Encoder.int_as_varint 16 encoder
   | Scip_types.Test -> Pbrt.Encoder.int_as_varint 32 encoder
+;;
 
 let rec encode_language (v : Scip_types.language) encoder =
   match v with
@@ -1042,3 +1008,4 @@ let rec encode_language (v : Scip_types.language) encoder =
   | Scip_types.Xsl -> Pbrt.Encoder.int_as_varint 32 encoder
   | Scip_types.Yaml -> Pbrt.Encoder.int_as_varint 74 encoder
   | Scip_types.Zig -> Pbrt.Encoder.int_as_varint 38 encoder
+;;
