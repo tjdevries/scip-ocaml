@@ -56,7 +56,7 @@ let test_namespaces_symbol () =
 ;;
 
 let test_roundtrip () =
-  let symbol =
+  let symbols =
     [ "scip-ocaml opam merlin 14.0 lib/Something#term."
     ; "lsif-java maven package 1.0.0 java/io/File#Entry.method(+1).(param)[TypeParam]"
     ; "rust-analyzer cargo std 1.0.0 macros/println!"
@@ -65,10 +65,10 @@ let test_roundtrip () =
   in
   Alcotest.(check (list string))
     "round trip"
-    symbol
+    symbols
     (List.map
        (fun s -> ScipSymbol.of_string s |> Result.get_ok |> ScipSymbol.to_string)
-       symbol)
+       symbols)
 ;;
 
 (* Run it *)

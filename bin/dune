@@ -1,5 +1,5 @@
 (executable
- (public_name scip_ocaml)
+ (public_name scip-ocaml)
  (name main)
  (libraries
   scip_ocaml

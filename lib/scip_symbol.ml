@@ -91,22 +91,22 @@ module ScipSymbol = struct
     map ~f:(fun name -> { name; suffix; disambiguator = "" }) pattern
   ;;
 
-  (*  <namespace> ::= <name> '/' *)
+  (* <namespace> ::= <name> '/' *)
   let namespace_desc = to_descriptor Namespace @@ ident <* char '/'
 
-  (*  <type> ::= <name> '#' *)
+  (* <type> ::= <name> '#' *)
   let type_desc = to_descriptor Type @@ ident <* char '#'
 
-  (*  <term> ::= <name> '.' *)
+  (* <term> ::= <name> '.' *)
   let term_desc = to_descriptor Term @@ ident <* char '.'
 
-  (*  <meta> ::= <name> ':' *)
+  (* <meta> ::= <name> ':' *)
   let meta_desc = to_descriptor Meta @@ ident <* char ':'
 
   (* <macro> ::= <name> '!' *)
   let macro_desc = to_descriptor Macro @@ ident <* char '!'
 
-  (*  <method> ::= <name> '(' <method-disambiguator> ').' *)
+  (* <method> ::= <name> '(' <method-disambiguator> ').' *)
   let method_desc =
     let suffix = Method in
     let* name = ident <* lparen in
@@ -114,14 +114,15 @@ module ScipSymbol = struct
     rparen <* char '.' >>= fun _ -> return { name; suffix; disambiguator }
   ;;
 
-  (*  <parameter> ::= '(' <name> ')' *)
+  (* <parameter> ::= '(' <name> ')' *)
   let parameter_desc = to_descriptor Parameter @@ (lparen *> ident <* rparen)
 
-  (*  <type-parameter> ::= '[' <name> ']' *)
+  (* <type-parameter> ::= '[' <name> ']' *)
   let type_parameter_desc = to_descriptor Type_parameter @@ (lbrace *> ident) <* rbrace
 
-  (*  <descriptor> ::= <namespace> | <type> | <term> | <method> | <type-parameter> | <parameter> | <meta> *)
-  let this_desc =
+  (* <descriptor> ::= <namespace> | <type> | <term> | <method> | <type-parameter> | <parameter> |
+     <meta> *)
+  let parse_descriptor =
     choice
       ~failure_msg:"Failed to find descriptor"
       [ namespace_desc
@@ -153,7 +154,7 @@ module ScipSymbol = struct
     let* name = space_escaped true in
     let* version = space_escaped true in
     let package = Option.some @@ default_package ~manager ~name ~version () in
-    let* descriptors = many1 this_desc in
+    let* descriptors = many1 parse_descriptor in
     Scip_types.default_symbol ~scheme ~package ~descriptors () |> Angstrom.return
   ;;
 
