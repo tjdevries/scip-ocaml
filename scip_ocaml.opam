@@ -18,6 +18,7 @@ depends: [
   "ocaml-protoc"
   "angstrom"
   "alcotest"
+  "ppx_base"
   "merlin-lib" {>= "4.8"}
   "odoc" {with-doc}
 ]

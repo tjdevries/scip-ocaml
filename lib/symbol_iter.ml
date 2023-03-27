@@ -13,20 +13,26 @@ module SymbolTracker = struct
     ; mutable local_idx : int
     }
 
-  let init () = { globals = ScipLocMap.empty; locals = ScipLocMap.empty; local_idx = 0 }
+  let init () =
+    { globals = Map.empty (module ScipLoc)
+    ; locals = Map.empty (module ScipLoc)
+    ; local_idx = 0
+    }
+  ;;
+
   let get_globals this = this.globals
   let get_locals this = this.locals
 
   let add_global this loc symbol =
     let loc = ScipLoc.of_loc loc in
-    this.globals <- ScipLocMap.add loc symbol this.globals
+    this.globals <- Map.add_exn this.globals ~key:loc ~data:symbol
   ;;
 
   let add_local this loc =
     let loc = ScipLoc.of_loc loc in
     let idx = this.local_idx in
     this.local_idx <- idx + 1;
-    this.locals <- ScipLocMap.add loc (ScipSymbol.new_local idx) this.locals
+    this.locals <- Map.add_exn this.locals ~key:loc ~data:(ScipSymbol.new_local idx)
   ;;
 end
 
@@ -41,7 +47,7 @@ module IterState = struct
     let with_descriptor descriptor f =
       descriptors := descriptor :: !descriptors;
       let result = f () in
-      descriptors := List.tl !descriptors;
+      descriptors := List.tl_exn !descriptors;
       result
     in
     let get_descriptors () = !descriptors in
@@ -55,23 +61,13 @@ module SymbolLookup = struct
     ; locals : string ScipLocMap.t
     }
 
-  let init globals locals =
-    Format.printf "globals: %d@." (ScipLocMap.cardinal globals);
-    ScipLocMap.iter
-      (fun k v -> Format.printf "  loc: %s -> %s@." (ScipLoc.hash k) v)
-      globals;
-    Format.printf "locals: %d@." (ScipLocMap.cardinal locals);
-    ScipLocMap.iter
-      (fun k v -> Format.printf "  loc: %s -> %s@." (ScipLoc.hash k) v)
-      locals;
-    { globals; locals }
-  ;;
+  let init globals locals = { globals; locals }
 
   let lookup this loc =
     let loc = ScipLoc.of_loc loc in
-    match ScipLocMap.find_opt loc this.globals with
+    match Map.find this.globals loc with
     | Some symbol -> Some symbol
-    | None -> ScipLocMap.find_opt loc this.locals
+    | None -> Map.find this.locals loc
   ;;
 end
 
@@ -116,7 +112,7 @@ let find_symbols structure state tracker =
       | Texp_function _ -> Some (make_symbol ~descriptors ~name ~suffix:Method ())
       | Texp_constant _ -> Some (make_symbol ~descriptors ~name ~suffix:Term ())
       | _ ->
-        Format.printf "  -> unknown expr: %s@." name;
+        Caml.Format.printf "  -> unknown expr: %s@." name;
         None
     in
     (* TODO: I'm not a huge fan of this... how to write better? *)
@@ -129,7 +125,7 @@ let find_symbols structure state tracker =
     default_iterator.value_binding local_iter value
   in
   let module_binding this module_ =
-    let name = module_.mb_name.txt |> Option.get in
+    let name = module_.mb_name.txt |> Option.value_exn in
     let descriptors = IterState.(state.get_descriptors ()) in
     let symbol = make_symbol ~descriptors ~name ~suffix:Type () in
     SymbolTracker.add_global tracker module_.mb_name.loc symbol;
@@ -144,7 +140,7 @@ let find_symbols structure state tracker =
 
 let traverse document structure =
   let relative_path = document.relative_path in
-  let relative_path = Filename.remove_extension relative_path in
+  let relative_path = Caml.Filename.remove_extension relative_path in
   let descriptors =
     ref [ default_descriptor ~name:relative_path ~suffix:Namespace () ]
   in

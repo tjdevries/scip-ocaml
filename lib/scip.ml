@@ -1,10 +1,3 @@
-(* TODO: would be nice to not have to put this at the top of the file... *)
-(* gotta ask anmon how to fix I guess. *)
-[@@@alert "-unstable"]
-[@@@ocaml.warning "-26-27"]
-
-open Base
-open Scip_loc
 open Scip_proto.Scip_types
 
 let ( let+ ) = Option.map
@@ -142,20 +135,18 @@ module ScipDocument = struct
     let symbol_lookup = Symbol_iter.traverse document structure in
     (* Rest of the stuff *)
     let relative_path = document.relative_path in
-    let relative_path = Caml.Filename.remove_extension relative_path in
+    let _ = Caml.Filename.remove_extension relative_path in
     let document = ref document in
     let add_occurence (occ : occurrence) =
       Caml.Format.printf "=> occ: %s@." occ.symbol;
       document := { !document with occurrences = occ :: !document.occurrences }
     in
     let expr sub t_expr =
-      let exp_env = t_expr.exp_env in
       let exp_desc = t_expr.exp_desc in
       let _ =
         match exp_desc with
-        | Texp_ident (path, loc, value) ->
-          let scip_loc = ScipLoc.of_loc value.val_loc in
-          let looked_up = SymbolLookup.lookup symbol_lookup scip_loc in
+        | Texp_ident (_, loc, value) ->
+          let looked_up = SymbolLookup.lookup symbol_lookup value.val_loc in
           let _ =
             match looked_up with
             | Some found ->
@@ -165,8 +156,8 @@ module ScipDocument = struct
             | None -> ()
           in
           ()
-        | Texp_constant c -> ()
-        | Texp_let (_, value, expr) -> ()
+        | Texp_constant _ -> ()
+        | Texp_let (_, _, _) -> ()
         (* { arg_label : arg_label; param : Ident.t; *)
         (* cases : value case list; partial : partial; } *)
         (* | Texp_function { arg_label; param; cases; partial } -> Format.printf "  f: %s\n" @@ Ident.name param *)
@@ -185,7 +176,6 @@ module ScipDocument = struct
         expr
       ; value_binding =
           (fun this value ->
-            let ty = value.vb_expr in
             let pat = value.vb_pat in
             let range = ScipRange.of_loc pat.pat_loc in
             (match SymbolLookup.lookup symbol_lookup pat.pat_loc with
@@ -225,7 +215,7 @@ module ScipDocument = struct
             let _ = item.str_env in
             let _ =
               match item.str_desc with
-              | Tstr_value (_, value) -> ()
+              | Tstr_value (_, _) -> ()
               | Tstr_eval (_, _)
               | Tstr_primitive _
               | Tstr_type (_, _)

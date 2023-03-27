@@ -7,5 +7,6 @@
   merlin-lib.ocaml_parsing
   angstrom
   compiler-libs.common)
+ (preprocess (pps ppx_base))
  (flags
-  (:standard -w -11)))
+  (:standard -w -11 -open Base)))

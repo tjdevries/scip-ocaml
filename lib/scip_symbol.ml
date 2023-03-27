@@ -10,7 +10,7 @@ module ScipDescriptor = struct
     in
     match desc.disambiguator with
     | "" ->
-      Format.sprintf
+      Caml.Format.sprintf
         (match desc.suffix with
          | Namespace | Package -> "%s/"
          | Type -> "%s#"
@@ -25,7 +25,7 @@ module ScipDescriptor = struct
         name
     | disambiguator ->
       (* As of right now, I think only methods can do stuff with disambiguator *)
-      Format.sprintf
+      Caml.Format.sprintf
         (match desc.suffix with
          | Method -> "%s(%s)."
          | _ -> assert false)
@@ -48,9 +48,9 @@ module ScipSymbol = struct
       | Some pkg -> pkg.manager ^ " " ^ pkg.name ^ " " ^ pkg.version ^ " "
       | None -> ""
     in
-    List.fold_left
-      (fun acc desc -> acc ^ ScipDescriptor.to_string desc)
-      str
+    List.fold
+      ~init:str
+      ~f:(fun acc desc -> acc ^ ScipDescriptor.to_string desc)
       sym.descriptors
   ;;
 
@@ -84,7 +84,7 @@ module ScipSymbol = struct
   ;;
 
   let simple_ident = take_while1 ident_char
-  let escaped_ident = backtick *> take_while1 (fun c -> c <> '`') <* backtick
+  let escaped_ident = backtick *> take_while1 (fun c -> Char.(c <> '`')) <* backtick
   let ident = choice ~failure_msg:"could not get ident" [ escaped_ident; simple_ident ]
 
   let to_descriptor suffix pattern =

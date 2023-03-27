@@ -1,4 +1,4 @@
-open Scip_ocaml.Scip_types
+open Scip_proto.Scip_types
 open Scip_ocaml.Scip_snapshot
 
 let test_empty_doc () =

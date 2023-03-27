@@ -26,6 +26,7 @@
    ocaml-protoc
    angstrom
    alcotest
+   ppx_base
    (merlin-lib (>= 4.8)))
  (tags
   (topics "to describe" your project)))

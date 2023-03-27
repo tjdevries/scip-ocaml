@@ -5,7 +5,7 @@ module ScipSymbol : sig
   val new_local : int -> string
 
   (* Convert string to scip symbol *)
-  val of_string : string -> (t, string) result
+  val of_string : string -> (t, string) Result.t
 
   (* Convert scip symbol to string *)
   val to_string : t -> string
