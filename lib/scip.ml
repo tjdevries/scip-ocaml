@@ -3,7 +3,7 @@
 [@@@alert "-unstable"]
 [@@@ocaml.warning "-26-27"]
 
-open Ocaml_parsing
+open Scip_loc
 
 let ( let+ ) = Stdune.Option.O.( let+ )
 let ( let* ) = Stdune.Option.O.( let* )
@@ -37,7 +37,7 @@ module ScipRange = struct
   type t = int32 list
 
   (* TODO: Handle different length ranges *)
-  let cmp a b = compare a b
+  let compare a b = compare a b
 
   let of_vec v =
     match List.length v with
@@ -112,31 +112,6 @@ let make_symbol ~descriptors ~name ~suffix ?disambiguator () =
     ()
 ;;
 
-module ScipLoc = struct
-  type t = Location.t
-
-  (* TODO: This seems kind of stupid... *)
-  let of_loc (p : Warnings.loc) : t =
-    { loc_start = p.loc_start; loc_end = p.loc_end; loc_ghost = p.loc_ghost }
-  ;;
-
-  let hash (this : t) =
-    let start_ = this.loc_start in
-    let end_ = this.loc_end in
-    Format.sprintf
-      "%s:%d:%d-%d:%d"
-      start_.pos_fname
-      start_.pos_lnum
-      start_.pos_cnum
-      end_.pos_lnum
-      end_.pos_cnum
-  ;;
-
-  let compare a b = Stdlib.compare (hash a) (hash b)
-end
-
-module ScipLocMap = Map.Make (ScipLoc)
-
 module ScipDocument = struct
   open Scip_types
   open Typedtree
@@ -160,28 +135,16 @@ module ScipDocument = struct
   ;;
 
   let handle_tree document structure =
+    let open Symbol_iter in
+    (* TODO: Need to merge all the globals together *)
+    let symbol_lookup = Symbol_iter.traverse document structure in
+    (* Rest of the stuff *)
     let relative_path = document.relative_path in
     let relative_path = Filename.remove_extension relative_path in
     let document = ref document in
-    let add_occurence occ =
+    let add_occurence (occ : Scip_types.occurrence) =
+      Format.printf "=> occ: %s@." occ.symbol;
       document := { !document with occurrences = occ :: !document.occurrences }
-    in
-    let descriptors =
-      ref [ default_descriptor ~name:relative_path ~suffix:Namespace () ]
-    in
-    let symbol_lookup = ref ScipLocMap.empty in
-    let add_symbol_lookup descriptors pat suffix =
-      let range = ScipRange.of_loc pat.pat_loc in
-      (* let name = value.vb_pat.pat_desc in *)
-      let name =
-        match pat.pat_desc with
-        | Tpat_var (ident, _) -> Ident.name ident
-        | _ -> "not tpat_var"
-      in
-      let symbol = make_symbol ~descriptors ~name ~suffix () in
-      let symbol = Scip_symbol.ScipSymbol.to_string symbol in
-      let pos = ScipLoc.of_loc pat.pat_loc in
-      symbol_lookup := ScipLocMap.add pos symbol !symbol_lookup
     in
     let expr sub t_expr =
       let exp_env = t_expr.exp_env in
@@ -190,7 +153,7 @@ module ScipDocument = struct
         match exp_desc with
         | Texp_ident (path, loc, value) ->
           let scip_loc = ScipLoc.of_loc value.val_loc in
-          let looked_up = ScipLocMap.find_opt scip_loc !symbol_lookup in
+          let looked_up = SymbolLookup.lookup symbol_lookup scip_loc in
           let _ =
             match looked_up with
             | Some found ->
@@ -199,21 +162,18 @@ module ScipDocument = struct
               add_occurence (default_occurrence ~range ~symbol ())
             | None -> ()
           in
-          Format.printf "    ident: %s\n" @@ Ttype_utils.path_to_string path
+          ()
         | Texp_constant c -> ()
-        | Texp_let (_, value, expr) -> print_endline "  let"
+        | Texp_let (_, value, expr) -> ()
         (* { arg_label : arg_label; param : Ident.t; *)
         (* cases : value case list; partial : partial; } *)
-        | Texp_function { arg_label; param; cases; partial } ->
-          Format.printf "  f: %s\n" @@ Ident.name param
-        | Texp_instvar (path, _, _) ->
-          Format.printf "    instvar: %s\n" @@ path_to_string path
-        | Texp_setinstvar (path, _, _, _) ->
-          Format.printf "    set instvar: %s\n" @@ path_to_string path
-        | Texp_construct (ident, desc, _) ->
-          print_long_ident ident.txt;
-          print_type_expr desc.cstr_res;
-          print_endline "  construct"
+        (* | Texp_function { arg_label; param; cases; partial } -> Format.printf "  f: %s\n" @@ Ident.name param *)
+        (* | Texp_instvar (path, _, _) -> Format.printf "    instvar: %s\n" @@ path_to_string path *)
+        (* | Texp_setinstvar (path, _, _, _) -> Format.printf "    set instvar: %s\n" @@ path_to_string path *)
+        (* | Texp_construct (ident, desc, _) -> *)
+        (*   print_long_ident ident.txt; *)
+        (*   print_type_expr desc.cstr_res; *)
+        (*   print_endline "  construct" *)
         | _ -> ()
       in
       Tast_iterator.default_iterator.expr sub t_expr
@@ -224,32 +184,28 @@ module ScipDocument = struct
       ; value_binding =
           (fun this value ->
             let ty = value.vb_expr in
-            let suffix =
-              match ty.exp_desc with
-              | Texp_function _ -> Some Method
-              | _ -> None
-            in
-            let _ =
-              match suffix with
-              | Some suffix ->
-                (* TODO: Don't copy *)
-                emit_pattern_definition add_occurence !descriptors value.vb_pat suffix;
-                add_symbol_lookup !descriptors value.vb_pat suffix
-              | None -> Format.printf "Unable to find type of value@."
-            in
+            let pat = value.vb_pat in
+            let range = ScipRange.of_loc pat.pat_loc in
+            (match SymbolLookup.lookup symbol_lookup pat.pat_loc with
+             | Some symbol ->
+               add_occurence
+               @@ default_occurrence
+                    ~range
+                    ~symbol
+                    ~symbol_roles:SymbolRoles.definition
+                    ()
+             | None -> ());
             (* Normally you'd visit this pattern, but we're handling this here. *)
-            (* this.pat this value.vb_pat; *)
+            this.pat this value.vb_pat;
             this.expr this value.vb_expr)
       ; structure =
           (fun this structure ->
-            print_endline "structure";
             (* let _ = *)
             (*   match structure with { str_items; str_type; str_final_env } -> () *)
             (* in *)
             Tast_iterator.default_iterator.structure this structure)
       ; structure_item =
           (fun this item ->
-            print_endline "  item";
             let _ = item.str_env in
             let _ =
               match item.str_desc with

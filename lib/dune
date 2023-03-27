@@ -1,6 +1,7 @@
 (library
  (name scip_ocaml)
- (modules scip_pb scip_types scip_pp scip scip_symbol scip_snapshot ttype_utils)
+ (modules scip_pb scip_types scip_pp scip scip_symbol scip_snapshot ttype_utils
+          symbol_iter scip_loc)
  (libraries
   ocaml-protoc
   stdune
