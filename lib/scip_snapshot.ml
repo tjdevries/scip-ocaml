@@ -1,6 +1,11 @@
 open Scip_types
 
-let to_string (_ : index) : string = "hello world"
+let to_string (index : index) : string list =
+  let metadata = index.metadata |> Option.get in
+  let root = metadata.project_root in
+  let root = Stdune.String.drop_prefix_if_exists root ~prefix:"file://" in
+  List.map (fun doc -> Format.sprintf "%s/%s" root doc.relative_path) index.documents
+;;
 
 let sort_occurrences occs =
   List.sort (fun a b -> Scip.ScipRange.compare a.range b.range) occs
@@ -36,19 +41,14 @@ let doc_to_string (doc : document) contents : string =
   let occs = Array.of_list doc.occurrences in
   let lines = String.split_on_char ~sep:'\n' contents in
   let result = ref "" in
+  (* TODO: This iterates over the occurrences way more than it needs to *)
   List.iteri lines ~f:(fun i line ->
     result := !result ^ Format.sprintf "  %s\n" line;
     (* something *)
     Array.iter occs ~f:(fun o ->
       if List.hd o.range = Int32.of_int i
       then result := !result ^ format_occurrence o
-      else ())
-    (* Array. *)
-    (* let occ = List.hd  *)
-    (* another *)
-    (* another *)
-    (* another *)
-    (* another *));
+      else ()));
   !result
 ;;
 (* List.fold_left ~init:"" ~f:(fun acc line -> acc ^ "\n" ^ line) lines *)

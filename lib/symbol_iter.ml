@@ -98,6 +98,7 @@ let find_symbols structure state tracker =
     let expr = value.vb_expr in
     match expr.exp_desc with
     | Texp_function _ -> SymbolTracker.add_local tracker value.vb_pat.pat_loc
+    | Texp_constant _ -> SymbolTracker.add_local tracker value.vb_pat.pat_loc
     | _ -> ()
   in
   let local_iter = { default_iterator with value_binding = local_value_bind } in
@@ -114,7 +115,10 @@ let find_symbols structure state tracker =
     let symbol =
       match expr.exp_desc with
       | Texp_function _ -> Some (make_symbol ~descriptors ~name ~suffix:Method ())
-      | _ -> None
+      | Texp_constant _ -> Some (make_symbol ~descriptors ~name ~suffix:Term ())
+      | _ ->
+        Format.printf "  -> unknown expr: %s@." name;
+        None
     in
     (* TODO: I'm not a huge fan of this... how to write better? *)
     let _ =
@@ -125,7 +129,17 @@ let find_symbols structure state tracker =
     (* Iterate through everything else *)
     default_iterator.value_binding local_iter value
   in
-  let iter = { default_iterator with value_binding } in
+  let module_binding this module_ =
+    let name = module_.mb_name.txt |> Option.get in
+    let descriptors = IterState.(state.get_descriptors ()) in
+    let symbol = make_symbol ~descriptors ~name ~suffix:Type () in
+    SymbolTracker.add_global tracker module_.mb_name.loc symbol;
+    (* TODO: Determine if this should be type or namespace... *)
+    let module_descriptor = default_descriptor ~name ~suffix:Type () in
+    state.with_descriptor module_descriptor
+    @@ fun () -> default_iterator.module_binding this module_
+  in
+  let iter = { default_iterator with value_binding; module_binding } in
   iter.structure iter structure
 ;;
 

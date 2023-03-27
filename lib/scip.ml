@@ -198,6 +198,20 @@ module ScipDocument = struct
             (* Normally you'd visit this pattern, but we're handling this here. *)
             this.pat this value.vb_pat;
             this.expr this value.vb_expr)
+      ; module_binding =
+          (fun this module_ ->
+            let loc = module_.mb_name.loc in
+            let range = ScipRange.of_loc loc in
+            (match SymbolLookup.lookup symbol_lookup loc with
+             | Some symbol ->
+               add_occurence
+               @@ default_occurrence
+                    ~range
+                    ~symbol
+                    ~symbol_roles:SymbolRoles.definition
+                    ()
+             | None -> ());
+            Tast_iterator.default_iterator.module_binding this module_)
       ; structure =
           (fun this structure ->
             (* let _ = *)
