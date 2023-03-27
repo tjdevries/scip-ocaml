@@ -1,5 +1,3 @@
-(* open Typedtree *)
-
 let rec path_to_string (path : Path.t) =
   let p =
     match path with
