@@ -13,7 +13,7 @@ depends: [
   "ocaml"
   "ocaml-compiler-libs"
   "dune" {>= "3.7"}
-  "stdune"
+  "base"
   "utop"
   "ocaml-protoc"
   "angstrom"

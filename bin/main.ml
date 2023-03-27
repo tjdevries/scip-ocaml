@@ -4,7 +4,6 @@
 let () = print_endline "\nHello, World!\n"
 
 (* let handle_signature document (signature : signature) = *)
-(*   let open Stdune in *)
 (*   let for_item _ = print_endline "yayaya" in *)
 (*   List.iter signature.sig_items ~f:for_item; *)
 (*   Format.printf "interface: %d" (List.length signature.sig_items); *)

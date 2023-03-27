@@ -3,7 +3,7 @@
  (name main)
  (libraries
   scip_ocaml
-  stdune
+  base
   compiler-libs.common
   merlin-lib.analysis
   merlin-lib.query_protocol

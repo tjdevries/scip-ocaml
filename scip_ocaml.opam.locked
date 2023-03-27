@@ -5,6 +5,7 @@ depends: [
   "alcotest" {= "1.7.0" & ?vendor}
   "angstrom" {= "0.15.0" & ?vendor}
   "astring" {= "0.8.5+dune" & ?vendor}
+  "base" {= "v0.15.1" & ?vendor}
   "base-bigarray" {= "base"}
   "base-bytes" {= "base+dune" & ?vendor}
   "base-domains" {= "base"}
@@ -17,7 +18,6 @@ depends: [
   "csexp" {= "1.5.1" & ?vendor}
   "dune" {= "3.7.0"}
   "dune-configurator" {= "3.7.0" & ?vendor}
-  "dyn" {= "3.7.0" & ?vendor}
   "findlib" {= "1.9.5+dune" & ?vendor}
   "fmt" {= "0.9.0+dune" & ?vendor}
   "lambda-term" {= "3.3.1" & ?vendor}
@@ -36,15 +36,13 @@ depends: [
   "ocaml-syntax-shims" {= "1.0.0" & ?vendor}
   "ocamlfind" {= "1.9.5+dune" & ?vendor}
   "ocplib-endian" {= "1.2" & ?vendor}
-  "ordering" {= "3.7.0" & ?vendor}
   "pbrt" {= "2.4" & ?vendor}
-  "pp" {= "1.1.2" & ?vendor}
   "re" {= "1.10.4" & ?vendor}
   "react" {= "1.2.2+dune" & ?vendor}
   "result" {= "1.5" & ?vendor}
   "seq" {= "base+dune" & ?vendor}
+  "sexplib0" {= "v0.15.1" & ?vendor}
   "stdlib-shims" {= "0.3.0" & ?vendor}
-  "stdune" {= "3.7.0" & ?vendor}
   "trie" {= "1.0.0" & ?vendor}
   "uchar" {= "0.0.2+dune2" & ?vendor}
   "utop" {= "2.11.0" & ?vendor}
@@ -65,6 +63,10 @@ pin-depends: [
   [
     "astring.0.8.5+dune"
     "https://github.com/dune-universe/astring/archive/v0.8.5+dune.tar.gz"
+  ]
+  [
+    "base.v0.15.1"
+    "https://github.com/janestreet/base/archive/refs/tags/v0.15.1.tar.gz"
   ]
   [
     "base-bytes.base+dune"
@@ -88,10 +90,6 @@ pin-depends: [
   ]
   [
     "dune-configurator.3.7.0"
-    "https://github.com/ocaml/dune/releases/download/3.7.0/dune-3.7.0.tbz"
-  ]
-  [
-    "dyn.3.7.0"
     "https://github.com/ocaml/dune/releases/download/3.7.0/dune-3.7.0.tbz"
   ]
   [
@@ -138,15 +136,7 @@ pin-depends: [
     "ocplib-endian.1.2"
     "https://github.com/OCamlPro/ocplib-endian/archive/refs/tags/1.2.tar.gz"
   ]
-  [
-    "ordering.3.7.0"
-    "https://github.com/ocaml/dune/releases/download/3.7.0/dune-3.7.0.tbz"
-  ]
   ["pbrt.2.4" "https://github.com/mransan/ocaml-protoc/archive/2.4.0.tar.gz"]
-  [
-    "pp.1.1.2"
-    "https://github.com/ocaml-dune/pp/releases/download/1.1.2/pp-1.1.2.tbz"
-  ]
   [
     "re.1.10.4"
     "https://github.com/ocaml/ocaml-re/releases/download/1.10.4/re-1.10.4.tbz"
@@ -161,12 +151,12 @@ pin-depends: [
   ]
   ["seq.base+dune" "https://github.com/c-cube/seq/archive/0.2.2.tar.gz"]
   [
-    "stdlib-shims.0.3.0"
-    "https://github.com/ocaml/stdlib-shims/releases/download/0.3.0/stdlib-shims-0.3.0.tbz"
+    "sexplib0.v0.15.1"
+    "https://github.com/janestreet/sexplib0/archive/refs/tags/v0.15.1.tar.gz"
   ]
   [
-    "stdune.3.7.0"
-    "https://github.com/ocaml/dune/releases/download/3.7.0/dune-3.7.0.tbz"
+    "stdlib-shims.0.3.0"
+    "https://github.com/ocaml/stdlib-shims/releases/download/0.3.0/stdlib-shims-0.3.0.tbz"
   ]
   ["trie.1.0.0" "https://github.com/kandu/trie/archive/1.0.0.tar.gz"]
   [
@@ -300,6 +290,13 @@ x-opam-monorepo-duniverse-dirs: [
     ["md5=909fdc277cf03096a35b565325d5314a"]
   ]
   [
+    "https://github.com/janestreet/base/archive/refs/tags/v0.15.1.tar.gz"
+    "base"
+    [
+      "sha256=755e303171ea267e3ba5af7aa8ea27537f3394d97c77d340b10f806d6ef61a14"
+    ]
+  ]
+  [
     "https://github.com/janestreet/ocaml-compiler-libs/releases/download/v0.12.4/ocaml-compiler-libs-v0.12.4.tbz"
     "ocaml-compiler-libs"
     [
@@ -311,6 +308,11 @@ x-opam-monorepo-duniverse-dirs: [
     "https://github.com/janestreet/result/releases/download/1.5/result-1.5.tbz"
     "result"
     ["md5=1b82dec78849680b49ae9a8a365b831b"]
+  ]
+  [
+    "https://github.com/janestreet/sexplib0/archive/refs/tags/v0.15.1.tar.gz"
+    "sexplib0"
+    ["md5=ab8fd6273f35a792cad48cbb3024a7f9"]
   ]
   [
     "https://github.com/kandu/mew/archive/0.1.0.tar.gz"
@@ -388,14 +390,6 @@ x-opam-monorepo-duniverse-dirs: [
     [
       "sha256=d605e4065fa90a58800440ef2f33a2d931398bf2c22061a8acb7df845c0aac02"
       "sha512=d785bbabaff9f6bf601399149ef0a42e5e99647b54e27f97ef1625907793dda22a45bf83e0e8a1eba2c63634c5484b54739ff0904ef556f5fc592efa38af7505"
-    ]
-  ]
-  [
-    "https://github.com/ocaml-dune/pp/releases/download/1.1.2/pp-1.1.2.tbz"
-    "pp"
-    [
-      "sha256=e4a4e98d96b1bb76950fcd6da4e938c86d989df4d7e48f02f7a44595f5af1d56"
-      "sha512=58f78b083483006b40814be9aac33c895349eb1c6427d2762b4d760192613401262478bd5deff909763517560b06af7bf013c6a6f87d549aafa77b26345303f2"
     ]
   ]
   [

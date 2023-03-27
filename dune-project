@@ -21,7 +21,7 @@
  (description "A SCIP Indexer for OCaml (powered by Merlin)")
  (depends
    ocaml ocaml-compiler-libs dune
-   stdune
+   base
    utop
    ocaml-protoc
    angstrom

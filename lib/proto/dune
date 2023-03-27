@@ -1,0 +1,17 @@
+(library
+  (name scip_proto)
+  (libraries ocaml-protoc)
+  (flags (:standard -w -11)))
+
+(rule
+ (targets
+  scip_pb.ml
+  scip_pb.mli
+  scip_pp.ml
+  scip_pp.mli
+  scip_types.ml
+  scip_types.mli)
+ (action
+  (run ocaml-protoc -binary -pp -ml_out ./ scip.proto))
+ (deps scip.proto)
+ (mode promote))

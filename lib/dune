@@ -1,25 +1,11 @@
 (library
  (name scip_ocaml)
- (modules scip_pb scip_types scip_pp scip scip_symbol scip_snapshot ttype_utils
-          symbol_iter scip_loc)
  (libraries
+  scip_proto
   ocaml-protoc
-  stdune
+  base
   merlin-lib.ocaml_parsing
   angstrom
   compiler-libs.common)
  (flags
   (:standard -w -11)))
-
-(rule
- (targets
-  scip_pb.ml
-  scip_pb.mli
-  scip_pp.ml
-  scip_pp.mli
-  scip_types.ml
-  scip_types.mli)
- (action
-  (run ocaml-protoc -binary -pp -ml_out ./ scip.proto))
- (deps scip.proto)
- (mode promote))

@@ -3,10 +3,12 @@
 [@@@alert "-unstable"]
 [@@@ocaml.warning "-26-27"]
 
+open Base
 open Scip_loc
+open Scip_proto.Scip_types
 
-let ( let+ ) = Stdune.Option.O.( let+ )
-let ( let* ) = Stdune.Option.O.( let* )
+let ( let+ ) = Option.map
+let ( let* ) v f = Option.bind ~f v
 
 module CmFile = struct
   type t =
@@ -14,9 +16,9 @@ module CmFile = struct
     | Cmti of string
 
   let of_string s =
-    if Filename.check_suffix s ".cmt"
+    if Caml.Filename.check_suffix s ".cmt"
     then Cmt s
-    else if Filename.check_suffix s ".cmti"
+    else if Caml.Filename.check_suffix s ".cmti"
     then Cmti s
     else failwith "CmFile.of_string"
   ;;
@@ -49,20 +51,23 @@ module ScipRange = struct
   let of_loc (loc : Warnings.loc) : t =
     let start_ = loc.loc_start in
     let finish_ = loc.loc_end in
-    [ Int32.of_int (start_.pos_lnum - 1)
-    ; Int32.of_int (start_.pos_cnum - start_.pos_bol)
-    ; Int32.of_int (finish_.pos_lnum - 1)
-    ; Int32.of_int (finish_.pos_cnum - finish_.pos_bol)
+    [ Int32.of_int_exn (start_.pos_lnum - 1)
+    ; Int32.of_int_exn (start_.pos_cnum - start_.pos_bol)
+    ; Int32.of_int_exn (finish_.pos_lnum - 1)
+    ; Int32.of_int_exn (finish_.pos_cnum - finish_.pos_bol)
     ]
   ;;
 
   let to_list this : int32 list = this
 end
 
+module StringMap = Map.M (String)
+
+let empty = Map.empty (module String)
+
 let find_cm_files dir =
-  let open Stdune in
   let is_directory dir =
-    try Sys.is_directory dir with
+    try Stdlib.Sys.is_directory dir with
     | Sys_error _ -> false
   in
   let choose_file f1 f2 =
@@ -73,29 +78,29 @@ let find_cm_files dir =
   in
   (* TODO we could get into a symlink loop here so we should we be careful *)
   let rec loop acc dir =
-    let contents = Sys.readdir dir in
-    Array.fold_left contents ~init:acc ~f:(fun acc fname ->
-      let path = Filename.concat dir fname in
+    let contents = Stdlib.Sys.readdir dir in
+    Array.fold contents ~init:acc ~f:(fun acc fname ->
+      let path = Caml.Filename.concat dir fname in
       if is_directory path
       then loop acc path
       else (
         match String.rsplit2 ~on:'.' path with
         | Some (path_without_ext, "cmt") ->
-          String.Map.set acc path_without_ext (CmFile.Cmt path)
+          Map.set acc ~key:path_without_ext ~data:(CmFile.Cmt path)
         | Some (path_without_ext, "cmti") ->
-          let current_file = String.Map.find acc path_without_ext in
+          let current_file = Map.find acc path_without_ext in
           let cmi_file = CmFile.Cmti path in
           (match current_file with
-           | None -> String.Map.set acc path_without_ext cmi_file
+           | None -> Map.set acc ~key:path_without_ext ~data:cmi_file
            | Some current_file ->
-             String.Map.set acc path_without_ext (choose_file current_file cmi_file))
+             Map.set acc ~key:path_without_ext ~data:(choose_file current_file cmi_file))
         | _ -> acc))
   in
-  loop String.Map.empty dir |> String.Map.values
+  loop empty dir |> Map.to_alist
 ;;
 
 module SymbolRoles = struct
-  let definition = Int32.of_int 1
+  let definition = Int32.of_int_exn 1
 end
 
 (* NOTE: descriptors is reversed from the way that you're going to actually
@@ -103,7 +108,6 @@ end
 
    We just reverse it when we make a symbol... maybe that's stupid :) *)
 let make_symbol ~descriptors ~name ~suffix ?disambiguator () =
-  let open Scip_types in
   let descriptors = default_descriptor ~name ~suffix ?disambiguator () :: descriptors in
   default_symbol
     ~scheme:"scip-ocaml"
@@ -113,9 +117,7 @@ let make_symbol ~descriptors ~name ~suffix ?disambiguator () =
 ;;
 
 module ScipDocument = struct
-  open Scip_types
   open Typedtree
-  open Ttype_utils
 
   (* let make_descriptor  *)
   (* let expression_to_symbol *)
@@ -140,10 +142,10 @@ module ScipDocument = struct
     let symbol_lookup = Symbol_iter.traverse document structure in
     (* Rest of the stuff *)
     let relative_path = document.relative_path in
-    let relative_path = Filename.remove_extension relative_path in
+    let relative_path = Caml.Filename.remove_extension relative_path in
     let document = ref document in
-    let add_occurence (occ : Scip_types.occurrence) =
-      Format.printf "=> occ: %s@." occ.symbol;
+    let add_occurence (occ : occurrence) =
+      Caml.Format.printf "=> occ: %s@." occ.symbol;
       document := { !document with occurrences = occ :: !document.occurrences }
     in
     let expr sub t_expr =
@@ -262,15 +264,12 @@ module ScipDocument = struct
 end
 
 module ScipIndex = struct
-  open Scip_types
-
   type t = index
 
   let name = "scip-ocaml"
   let version = "0.1"
 
   let index project_root cmt_files =
-    let open Stdune in
     (* TODO Can you get the arguments just from Sys.argv or something? *)
     let tool_info = Some (default_tool_info ~name ~version ~arguments:[] ()) in
     let project_root = "file://" ^ project_root in
@@ -278,11 +277,11 @@ module ScipIndex = struct
     (* TODO: Gotta think about how this works with external symbols *)
     let documents =
       List.fold_left cmt_files ~init:[] ~f:(fun acc cmt ->
-        Format.printf "Loading %s... " cmt;
+        Caml.Format.printf "Loading %s... " cmt;
         match ScipDocument.of_cmt cmt with
         | Some doc -> doc :: acc
         | None ->
-          Format.printf "Couldn't load %s" cmt;
+          Caml.Format.printf "Couldn't load %s" cmt;
           acc)
     in
     default_index ~metadata ~documents ()
@@ -290,11 +289,11 @@ module ScipIndex = struct
 
   let serialize index outfile =
     let p_encoder = Pbrt.Encoder.create () in
-    let write_index = Scip_pb.encode_index index in
+    let write_index = Scip_proto.Scip_pb.encode_index index in
     write_index p_encoder;
     let bytes = Pbrt.Encoder.to_bytes p_encoder in
-    let file = open_out outfile in
-    output_bytes file bytes;
-    close_out file
+    let file = Caml.open_out outfile in
+    Caml.output_bytes file bytes;
+    Caml.close_out file
   ;;
 end

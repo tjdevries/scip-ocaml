@@ -1,5 +1,5 @@
 open Scip_loc
-open Scip_types
+open Scip_proto.Scip_types
 open Typedtree
 module ScipSymbol = Scip_symbol.ScipSymbol
 
@@ -32,8 +32,8 @@ end
 
 module IterState = struct
   type t =
-    { with_descriptor : Scip_types.descriptor -> (unit -> unit) -> unit
-    ; get_descriptors : unit -> Scip_types.descriptor list
+    { with_descriptor : descriptor -> (unit -> unit) -> unit
+    ; get_descriptors : unit -> descriptor list
     }
 
   let init descriptors =
@@ -80,7 +80,6 @@ end
 
    We just reverse it when we make a symbol... maybe that's stupid :) *)
 let make_symbol ~descriptors ~name ~suffix ?disambiguator () =
-  let open Scip_types in
   let descriptors = default_descriptor ~name ~suffix ?disambiguator () :: descriptors in
   ScipSymbol.to_string
   @@ default_symbol
@@ -94,7 +93,7 @@ let find_symbols structure state tracker =
   let default_iterator = Tast_iterator.default_iterator in
   (* Used to generate symbols not that are local.
       Called by the iterator below *)
-  let local_value_bind this value =
+  let local_value_bind _ value =
     let expr = value.vb_expr in
     match expr.exp_desc with
     | Texp_function _ -> SymbolTracker.add_local tracker value.vb_pat.pat_loc
@@ -103,7 +102,7 @@ let find_symbols structure state tracker =
   in
   let local_iter = { default_iterator with value_binding = local_value_bind } in
   (* Used to generate top level symbol definitions *)
-  let value_binding this value =
+  let value_binding _ value =
     let pattern = value.vb_pat in
     let expr = value.vb_expr in
     let descriptors = IterState.(state.get_descriptors ()) in

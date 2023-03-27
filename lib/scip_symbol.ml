@@ -1,8 +1,8 @@
 open Angstrom
-open Scip_types
+open Scip_proto.Scip_types
 
 module ScipDescriptor = struct
-  type t = Scip_types.descriptor
+  type t = descriptor
 
   let to_string (desc : t) =
     let name =
@@ -35,7 +35,7 @@ module ScipDescriptor = struct
 end
 
 module ScipSymbol = struct
-  type t = Scip_types.symbol
+  type t = symbol
 
   (* Convert a symbol a string *)
   let to_string (sym : t) =
@@ -155,7 +155,7 @@ module ScipSymbol = struct
     let* version = space_escaped true in
     let package = Option.some @@ default_package ~manager ~name ~version () in
     let* descriptors = many1 parse_descriptor in
-    Scip_types.default_symbol ~scheme ~package ~descriptors () |> Angstrom.return
+    default_symbol ~scheme ~package ~descriptors () |> Angstrom.return
   ;;
 
   (* takes a string, returns a scip symbol *)
