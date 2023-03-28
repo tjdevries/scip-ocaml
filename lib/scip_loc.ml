@@ -36,9 +36,9 @@ module ScipLoc = struct
       (* { loc_start = p.loc_start; loc_end = p.loc_end; loc_ghost = p.loc_ghost } *)
       { filename = p.loc_start.pos_fname
       ; start_line = p.loc_start.pos_lnum
-      ; start_col = p.loc_start.pos_cnum
+      ; start_col = p.loc_start.pos_cnum - p.loc_start.pos_bol
       ; end_line = p.loc_end.pos_lnum
-      ; end_col = p.loc_end.pos_cnum
+      ; end_col = p.loc_end.pos_cnum - p.loc_end.pos_bol
       }
     ;;
   end

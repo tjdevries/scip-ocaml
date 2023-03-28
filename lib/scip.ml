@@ -28,7 +28,7 @@ module CmFile = struct
 end
 
 module ScipRange = struct
-  type t = int32 list
+  type t = int32 list [@@deriving sexp]
 
   (* TODO: Handle different length ranges *)
   let compare a b = compare a b
@@ -51,6 +51,7 @@ module ScipRange = struct
   ;;
 
   let to_list this : int32 list = this
+  let to_string this = Caml.Format.sprintf "%s" (Sexp.to_string_hum (sexp_of_t this))
 end
 
 module StringMap = Map.M (String)
@@ -127,10 +128,8 @@ module ScipDocument = struct
     read_file path
   ;;
 
-  let handle_tree document structure =
+  let handle_structure index_lookup document structure =
     let open Symbol_iter in
-    (* TODO: Need to merge all the globals together *)
-    let symbol_lookup = Symbol_iter.traverse document structure in
     (* Rest of the stuff *)
     let relative_path = document.relative_path in
     let _ = Caml.Filename.remove_extension relative_path in
@@ -149,7 +148,8 @@ module ScipDocument = struct
       let _ =
         match exp_desc with
         | Texp_ident (_, loc, value) ->
-          let looked_up = SymbolLookup.lookup symbol_lookup value.val_loc in
+          (* let loc = Path.head path in *)
+          let looked_up = IndexSymbols.lookup index_lookup value.val_loc in
           let _ =
             match looked_up with
             | Some found ->
@@ -174,14 +174,50 @@ module ScipDocument = struct
       in
       Tast_iterator.default_iterator.expr sub t_expr
     in
+    (* pat: 'k . iterator -> 'k general_pattern -> unit; *)
+    let pat this p =
+      (* let p = *)
+      (*   match p with *)
+      (*   | { pat_desc; pat_loc; pat_extra; pat_type; pat_env; pat_attributes } -> _ *)
+      (* in *)
+      let loc = p.pat_loc in
+      Caml.Format.printf "pat: %s@." (ScipRange.to_string (ScipRange.of_loc loc));
+      let looked_up = IndexSymbols.lookup index_lookup loc in
+      let _ =
+        match looked_up with
+        | Some found ->
+          let range = ScipRange.of_loc loc in
+          let symbol = found in
+          add_occurence (default_occurrence ~range ~symbol ())
+        | None -> ()
+      in
+      (* let _ = *)
+      (*   match p.pat_desc with *)
+      (*   | Tpat_any -> () *)
+      (*   | Tpat_var (_, loc) -> *)
+      (*     let looked_up = DocumentSymbols.lookup symbol_lookup loc.loc in *)
+      (*     let _ = *)
+      (*       match looked_up with *)
+      (*       | Some found -> *)
+      (*         let range = ScipRange.of_loc loc.loc in *)
+      (*         let symbol = found in *)
+      (*         add_occurence (default_occurrence ~range ~symbol ()) *)
+      (*       | None -> () *)
+      (*     in *)
+      (*     print_endline "  var" *)
+      (*   | _ -> () *)
+      (* in *)
+      Tast_iterator.default_iterator.pat this p
+    in
     let iter =
       { Tast_iterator.default_iterator with
         expr
+      ; pat
       ; value_binding =
           (fun this value ->
             let pat = value.vb_pat in
             let range = ScipRange.of_loc pat.pat_loc in
-            (match SymbolLookup.lookup symbol_lookup pat.pat_loc with
+            (match IndexSymbols.lookup index_lookup pat.pat_loc with
              | Some symbol ->
                add_occurence
                @@ default_occurrence
@@ -191,13 +227,13 @@ module ScipDocument = struct
                     ()
              | None -> ());
             (* Normally you'd visit this pattern, but we're handling this here. *)
-            this.pat this value.vb_pat;
+            (* this.pat this value.vb_pat; *)
             this.expr this value.vb_expr)
       ; module_binding =
           (fun this module_ ->
             let loc = module_.mb_name.loc in
             let range = ScipRange.of_loc loc in
-            (match SymbolLookup.lookup symbol_lookup loc with
+            (match IndexSymbols.lookup index_lookup loc with
              | Some symbol ->
                add_occurence
                @@ default_occurrence
@@ -240,18 +276,30 @@ module ScipDocument = struct
     Some !document
   ;;
 
-  let handle_signature document _ = Some document
+  let handle_signature _ document _ = Some document
 
   (* Helper to make a new document *)
   let make_document relative_path = default_document ~language:"ocaml" ~relative_path ()
 
-  let of_cmt cmt_path =
+  let get_symbols cmt_path =
+    let info = Cmt_format.read_cmt cmt_path in
+    (* TODO: Need to merge all the globals together *)
+    let* relative_path = info.cmt_sourcefile in
+    let document = make_document relative_path in
+    match info.cmt_annots with
+    | Cmt_format.Implementation tree -> Some (Symbol_iter.traverse document tree)
+    | Cmt_format.Interface _ -> None
+    | _ -> failwith "not a cmti file"
+  ;;
+
+  let of_cmt index_lookup cmt_path =
     let info = Cmt_format.read_cmt cmt_path in
     let* relative_path = info.cmt_sourcefile in
     let document = make_document relative_path in
     match info.cmt_annots with
-    | Cmt_format.Implementation tree -> handle_tree document tree
-    | Cmt_format.Interface signature -> handle_signature document signature
+    | Cmt_format.Implementation structure ->
+      handle_structure index_lookup document structure
+    | Cmt_format.Interface signature -> handle_signature index_lookup document signature
     | _ -> failwith "not a cmti file"
   ;;
 end
@@ -263,15 +311,34 @@ module ScipIndex = struct
   let version = "0.1"
 
   let index project_root cmt_files =
+    let open Symbol_iter in
     (* TODO Can you get the arguments just from Sys.argv or something? *)
     let tool_info = Some (default_tool_info ~name ~version ~arguments:[] ()) in
     let project_root = "file://" ^ project_root in
     let metadata = Some (default_metadata ~project_root ~tool_info ()) in
+    (* It may be possible that we don't have to lookup EVERYTHING, but for now it's fine *)
+    let index_lookup = IndexSymbols.init () in
+    let index_lookup =
+      List.fold
+        ~init:index_lookup
+        ~f:(fun acc cmt ->
+          let document_lookup = ScipDocument.get_symbols cmt in
+          match document_lookup with
+          | Some lookup -> IndexSymbols.merge acc lookup
+          | None -> acc)
+        cmt_files
+    in
+    Caml.Format.printf "========= Globals =========@.";
+    Map.iteri index_lookup.globals ~f:(fun ~key ~data ->
+      Caml.Format.printf
+        "%s -> %s@."
+        (Sexp.to_string @@ Scip_loc.ScipLoc.sexp_of_t key)
+        data);
     (* TODO: Gotta think about how this works with external symbols *)
     let documents =
       List.fold_left cmt_files ~init:[] ~f:(fun acc cmt ->
         Caml.Format.printf "Loading %s... " cmt;
-        match ScipDocument.of_cmt cmt with
+        match ScipDocument.of_cmt index_lookup cmt with
         | Some doc -> doc :: acc
         | None ->
           Caml.Format.printf "Couldn't load %s" cmt;

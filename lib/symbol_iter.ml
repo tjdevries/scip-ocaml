@@ -58,13 +58,57 @@ module IterState = struct
   ;;
 end
 
-module SymbolLookup = struct
+(* document -> string ScipLocMap.t *)
+(* Map.find string -> string ScipLocaMap.t *)
+
+module DocumentSymbols = struct
   type t =
-    { globals : string ScipLocMap.t
+    { path : string
+    ; globals : string ScipLocMap.t
     ; locals : string ScipLocMap.t
     }
 
-  let init globals locals = { globals; locals }
+  let init document globals locals = { path = document.relative_path; globals; locals }
+
+  let lookup this loc =
+    let loc = ScipLoc.of_loc loc in
+    match Map.find this.globals loc with
+    | Some symbol -> Some symbol
+    | None -> Map.find this.locals loc
+  ;;
+end
+
+type string_to_loc = string ScipLocMap.t
+
+(* type string_map = Base.String.Map; *)
+type int_to_string = int Map.M(String).t
+
+(*  string -> string -> ScipLoc *)
+(* string -> ScipLocal = ScipLocMap.t *)
+type string_to_scip_map = string ScipLocMap.t
+
+module IndexSymbols = struct
+  (* TODO: locals should be multipler smaller maps, I think the lookup
+           would probably be much better... but oh well*)
+  type t =
+    { globals : string_to_loc
+    ; locals : string_to_loc
+    }
+
+  let init () =
+    { globals = Map.empty (module ScipLoc); locals = Map.empty (module ScipLoc) }
+  ;;
+
+  let merge this (doc : DocumentSymbols.t) =
+    let globals =
+      Map.fold doc.globals ~init:this.globals ~f:(fun ~key ~data ->
+        Map.add_exn ~key ~data)
+    in
+    let locals =
+      Map.fold doc.locals ~init:this.locals ~f:(fun ~key ~data -> Map.add_exn ~key ~data)
+    in
+    { globals; locals }
+  ;;
 
   let lookup this loc =
     let loc = ScipLoc.of_loc loc in
@@ -152,7 +196,8 @@ let traverse document structure =
   let state = IterState.init descriptors in
   let tracker = SymbolTracker.init () in
   find_symbols structure state tracker;
-  SymbolLookup.init
+  DocumentSymbols.init
+    document
     (SymbolTracker.get_globals tracker)
     (SymbolTracker.get_locals tracker)
 ;;
