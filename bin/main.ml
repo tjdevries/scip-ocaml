@@ -18,10 +18,11 @@ let () =
   let open Scip_ocaml.Scip in
   print_endline "trying to read a file";
   let project_root = "/home/tjdevries/sourcegraph/scip_ocaml/" in
+  (* let project_root = "/home/tjdevries/build/simple/" in *)
   let files = find_cm_files project_root in
   List.iter (fun f -> print_endline f) files;
   let index = ScipIndex.index project_root files in
-  ScipIndex.serialize index "test.scip";
+  ScipIndex.serialize index (project_root ^ "test.scip");
   (*  Now we can snapshot the document *)
   List.iter
     (fun d ->

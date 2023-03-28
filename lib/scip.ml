@@ -127,23 +127,6 @@ module ScipDocument = struct
     read_file path
   ;;
 
-  (* let make_descriptor  *)
-  (* let expression_to_symbol *)
-
-  let emit_pattern_definition add_occurence descriptors pat suffix =
-    let range = ScipRange.of_loc pat.pat_loc in
-    (* let name = value.vb_pat.pat_desc in *)
-    let name =
-      match pat.pat_desc with
-      | Tpat_var (ident, _) -> Ident.name ident
-      | _ -> "not tpat_var"
-    in
-    let symbol = make_symbol ~descriptors ~name ~suffix () in
-    let symbol = Scip_symbol.ScipSymbol.to_string symbol in
-    let symbol_roles = SymbolRoles.definition in
-    add_occurence (default_occurrence ~range ~symbol ~symbol_roles ())
-  ;;
-
   let handle_tree document structure =
     let open Symbol_iter in
     (* TODO: Need to merge all the globals together *)
@@ -154,7 +137,12 @@ module ScipDocument = struct
     let document = ref document in
     let add_occurence (occ : occurrence) =
       Caml.Format.printf "=> occ: %s@." occ.symbol;
-      document := { !document with occurrences = occ :: !document.occurrences }
+      let symbols =
+        if Int32.(occ.symbol_roles = SymbolRoles.definition)
+        then default_symbol_information ~symbol:occ.symbol () :: !document.symbols
+        else !document.symbols
+      in
+      document := { !document with occurrences = occ :: !document.occurrences; symbols }
     in
     let expr sub t_expr =
       let exp_desc = t_expr.exp_desc in
