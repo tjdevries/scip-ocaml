@@ -21,7 +21,6 @@ module CmFile = struct
     | Cmti s -> s
   ;;
 
-  (* todo this is so bad *)
   let load_cmt = function
     | Cmt s -> Cmt_format.read s
     | Cmti s -> Cmt_format.read s
@@ -89,7 +88,7 @@ let find_cm_files dir =
              Map.set acc ~key:path_without_ext ~data:(choose_file current_file cmi_file))
         | _ -> acc))
   in
-  loop empty dir |> Map.to_alist
+  loop empty dir |> Map.to_alist |> List.map ~f:(fun (_, v) -> CmFile.to_string v)
 ;;
 
 module SymbolRoles = struct
@@ -109,8 +108,21 @@ let make_symbol ~descriptors ~name ~suffix ?disambiguator () =
     ()
 ;;
 
+let read_file filename =
+  let ch = Caml.open_in filename in
+  let content = Caml.really_input_string ch (Caml.in_channel_length ch) in
+  Caml.close_in ch;
+  content
+;;
+
 module ScipDocument = struct
   open Typedtree
+
+  let read document root =
+    let root = Base.String.chop_prefix_if_exists root ~prefix:"file://" in
+    let path = root ^ document.relative_path in
+    read_file path
+  ;;
 
   (* let make_descriptor  *)
   (* let expression_to_symbol *)
