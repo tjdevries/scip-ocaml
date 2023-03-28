@@ -109,10 +109,13 @@ let make_symbol ~descriptors ~name ~suffix ?disambiguator () =
 ;;
 
 let read_file filename =
-  let ch = Caml.open_in filename in
-  let content = Caml.really_input_string ch (Caml.in_channel_length ch) in
-  Caml.close_in ch;
-  content
+  try
+    let ch = Caml.open_in filename in
+    let content = Caml.really_input_string ch (Caml.in_channel_length ch) in
+    Caml.close_in ch;
+    Some content
+  with
+  | _ -> None
 ;;
 
 module ScipDocument = struct

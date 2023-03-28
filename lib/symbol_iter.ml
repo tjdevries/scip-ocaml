@@ -25,7 +25,10 @@ module SymbolTracker = struct
 
   let add_global this loc symbol =
     let loc = ScipLoc.of_loc loc in
-    this.globals <- Map.add_exn this.globals ~key:loc ~data:symbol
+    (* TODO: Probably should not let duplicateds happen *)
+    match Map.add this.globals ~key:loc ~data:symbol with
+    | `Duplicate -> ()
+    | `Ok globals -> this.globals <- globals
   ;;
 
   let add_local this loc =
@@ -71,6 +74,8 @@ module SymbolLookup = struct
   ;;
 end
 
+let default_package = Some (default_package ~manager:"opam" ~name:"." ~version:"." ())
+
 (* NOTE: descriptors is reversed from the way that you're going to actually
    use them, since that allows you to super easily pop on and off the scope.
 
@@ -80,7 +85,7 @@ let make_symbol ~descriptors ~name ~suffix ?disambiguator () =
   ScipSymbol.to_string
   @@ default_symbol
        ~scheme:"scip-ocaml"
-       ~package:None
+       ~package:default_package
        ~descriptors:(List.rev descriptors)
        ()
 ;;
