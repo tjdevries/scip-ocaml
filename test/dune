@@ -1,2 +1,1 @@
-(test
- (name scip_ocaml))
+(cram (package scip_ocaml))

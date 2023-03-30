@@ -1,9 +1,15 @@
 (executable
  (public_name scip-ocaml)
  (name main)
+ ; How was I supposed to know this?...
+ ; I didn't see this in the docs
+ (preprocess (pps ppx_deriving_cmdliner ppx_deriving.show))
  (libraries
   scip_ocaml
   base
+  fmt
+  cmdliner
+  ppx_deriving_cmdliner
   compiler-libs.common
   merlin-lib.analysis
   merlin-lib.query_protocol

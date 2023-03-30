@@ -1,0 +1,2 @@
+(library
+ (name snapshot_single_function))

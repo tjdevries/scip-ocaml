@@ -17,3 +17,13 @@ second pass:
 - visit the tree
 - lookup locations to see if we have a symbol
 - if it's a def, emit def. if it's a ref, emit ref.
+
+
+# Create new snapshot
+
+- add a new folder in lib/snapshots/input/
+- add a dune-project with `(lang dune 3.7)`
+- add a dune file with the library
+- add the library
+- boom
+- `dune build --root=.`

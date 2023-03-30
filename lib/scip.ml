@@ -51,7 +51,7 @@ module ScipRange = struct
   ;;
 
   let to_list this : int32 list = this
-  let to_string this = Caml.Format.sprintf "%s" (Sexp.to_string_hum (sexp_of_t this))
+  let to_string this = Fmt.str "%s" (Sexp.to_string_hum (sexp_of_t this))
 end
 
 module StringMap = Map.M (String)
@@ -109,6 +109,8 @@ let make_symbol ~descriptors ~name ~suffix ?disambiguator () =
     ()
 ;;
 
+let make_documentation type_info = [ "```ocaml"; type_info; "```" ]
+
 let read_file filename =
   try
     let ch = Caml.open_in filename in
@@ -134,11 +136,12 @@ module ScipDocument = struct
     let relative_path = document.relative_path in
     let _ = Caml.Filename.remove_extension relative_path in
     let document = ref document in
-    let add_occurence (occ : occurrence) =
-      Caml.Format.printf "=> occ: %s@." occ.symbol;
+    let add_occurence ?documentation (occ : occurrence) =
       let symbols =
         if Int32.(occ.symbol_roles = SymbolRoles.definition)
-        then default_symbol_information ~symbol:occ.symbol () :: !document.symbols
+        then
+          default_symbol_information ~symbol:occ.symbol ?documentation ()
+          :: !document.symbols
         else !document.symbols
       in
       document := { !document with occurrences = occ :: !document.occurrences; symbols }
@@ -176,12 +179,8 @@ module ScipDocument = struct
     in
     (* pat: 'k . iterator -> 'k general_pattern -> unit; *)
     let pat this p =
-      (* let p = *)
-      (*   match p with *)
-      (*   | { pat_desc; pat_loc; pat_extra; pat_type; pat_env; pat_attributes } -> _ *)
-      (* in *)
+      (* pat_desc; pat_loc; pat_extra; pat_type; pat_env; pat_attributes *)
       let loc = p.pat_loc in
-      Caml.Format.printf "pat: %s@." (ScipRange.to_string (ScipRange.of_loc loc));
       let looked_up = IndexSymbols.lookup index_lookup loc in
       let _ =
         match looked_up with
@@ -219,7 +218,10 @@ module ScipDocument = struct
             let range = ScipRange.of_loc pat.pat_loc in
             (match IndexSymbols.lookup index_lookup pat.pat_loc with
              | Some symbol ->
-               add_occurence
+               let documentation =
+                 make_documentation @@ Fmt.str "%a" Printtyp.type_expr pat.pat_type
+               in
+               add_occurence ~documentation
                @@ default_occurrence
                     ~range
                     ~symbol
@@ -235,7 +237,11 @@ module ScipDocument = struct
             let range = ScipRange.of_loc loc in
             (match IndexSymbols.lookup index_lookup loc with
              | Some symbol ->
-               add_occurence
+               let documentation =
+                 make_documentation
+                 @@ Fmt.str "%a" Printtyp.modtype module_.mb_expr.mod_type
+               in
+               add_occurence ~documentation
                @@ default_occurrence
                     ~range
                     ~symbol
@@ -243,12 +249,6 @@ module ScipDocument = struct
                     ()
              | None -> ());
             Tast_iterator.default_iterator.module_binding this module_)
-      ; structure =
-          (fun this structure ->
-            (* let _ = *)
-            (*   match structure with { str_items; str_type; str_final_env } -> () *)
-            (* in *)
-            Tast_iterator.default_iterator.structure this structure)
       ; structure_item =
           (fun this item ->
             let _ = item.str_env in
@@ -328,20 +328,13 @@ module ScipIndex = struct
           | None -> acc)
         cmt_files
     in
-    Caml.Format.printf "========= Globals =========@.";
-    Map.iteri index_lookup.globals ~f:(fun ~key ~data ->
-      Caml.Format.printf
-        "%s -> %s@."
-        (Sexp.to_string @@ Scip_loc.ScipLoc.sexp_of_t key)
-        data);
     (* TODO: Gotta think about how this works with external symbols *)
     let documents =
       List.fold_left cmt_files ~init:[] ~f:(fun acc cmt ->
-        Caml.Format.printf "Loading %s... " cmt;
         match ScipDocument.of_cmt index_lookup cmt with
         | Some doc -> doc :: acc
         | None ->
-          Caml.Format.printf "Couldn't load %s" cmt;
+          Fmt.epr "Couldn't load %s" cmt;
           acc)
     in
     default_index ~metadata ~documents ()
@@ -355,5 +348,11 @@ module ScipIndex = struct
     let file = Caml.open_out outfile in
     Caml.output_bytes file bytes;
     Caml.close_out file
+  ;;
+
+  let deserialize infile =
+    let* contents = read_file infile in
+    let p_decoder = Pbrt.Decoder.of_string contents in
+    Some (Scip_proto.Scip_pb.decode_index p_decoder)
   ;;
 end

@@ -4,9 +4,12 @@
   scip_proto
   ocaml-protoc
   base
+  fmt
   merlin-lib.ocaml_parsing
   angstrom
   compiler-libs.common)
  (preprocess (pps ppx_base))
  (flags
   (:standard -w -11 -open Base)))
+
+(data_only_dirs snapshots)

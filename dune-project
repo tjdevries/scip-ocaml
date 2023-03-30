@@ -22,13 +22,15 @@
  (depends
    ocaml ocaml-compiler-libs dune
    base
+   fmt
    utop
    ocaml-protoc
    angstrom
    alcotest
+   cmdliner
    ppx_base
+   ppx_deriving_cmdliner
    (merlin-lib (>= 4.8)))
  (tags
   (topics "to describe" your project)))
-
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project

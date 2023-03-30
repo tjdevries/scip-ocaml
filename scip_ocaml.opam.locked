@@ -41,10 +41,12 @@ depends: [
   "ppx_cold" {= "v0.15.0" & ?vendor}
   "ppx_compare" {= "v0.15.0" & ?vendor}
   "ppx_derivers" {= "1.2.1" & ?vendor}
+  "ppx_deriving" {= "5.2.1" & ?vendor}
+  "ppx_deriving_cmdliner" {= "0.6.0" & ?vendor}
   "ppx_enumerate" {= "v0.15.0" & ?vendor}
   "ppx_hash" {= "v0.15.0" & ?vendor}
-  "ppx_sexp_conv" {= "v0.15.1" & ?vendor}
-  "ppxlib" {= "0.29.1" & ?vendor}
+  "ppx_sexp_conv" {= "v0.15.0" & ?vendor}
+  "ppxlib" {= "0.25.1" & ?vendor}
   "re" {= "1.10.4" & ?vendor}
   "react" {= "1.2.2+dune" & ?vendor}
   "result" {= "1.5" & ?vendor}
@@ -162,6 +164,14 @@ pin-depends: [
     "https://github.com/ocaml-ppx/ppx_derivers/archive/1.2.1.tar.gz"
   ]
   [
+    "ppx_deriving.5.2.1"
+    "https://github.com/ocaml-ppx/ppx_deriving/releases/download/v5.2.1/ppx_deriving-v5.2.1.tbz"
+  ]
+  [
+    "ppx_deriving_cmdliner.0.6.0"
+    "https://github.com/hammerlab/ppx_deriving_cmdliner/archive/refs/tags/v0.6.0.tar.gz"
+  ]
+  [
     "ppx_enumerate.v0.15.0"
     "https://ocaml.janestreet.com/ocaml-core/v0.15/files/ppx_enumerate-v0.15.0.tar.gz"
   ]
@@ -170,12 +180,12 @@ pin-depends: [
     "https://ocaml.janestreet.com/ocaml-core/v0.15/files/ppx_hash-v0.15.0.tar.gz"
   ]
   [
-    "ppx_sexp_conv.v0.15.1"
-    "https://github.com/janestreet/ppx_sexp_conv/archive/refs/tags/v0.15.1.tar.gz"
+    "ppx_sexp_conv.v0.15.0"
+    "https://ocaml.janestreet.com/ocaml-core/v0.15/files/ppx_sexp_conv-v0.15.0.tar.gz"
   ]
   [
-    "ppxlib.0.29.1"
-    "https://github.com/ocaml-ppx/ppxlib/releases/download/0.29.1/ppxlib-0.29.1.tbz"
+    "ppxlib.0.25.1"
+    "https://github.com/ocaml-ppx/ppxlib/releases/download/0.25.1/ppxlib-0.25.1.tbz"
   ]
   [
     "re.1.10.4"
@@ -320,6 +330,11 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
+    "https://github.com/hammerlab/ppx_deriving_cmdliner/archive/refs/tags/v0.6.0.tar.gz"
+    "ppx_deriving_cmdliner"
+    ["md5=5a1050704c477f0ee46001cc2f4fe697"]
+  ]
+  [
     "https://github.com/inhabitedtype/angstrom/archive/0.15.0.tar.gz"
     "angstrom"
     ["md5=5104768c404ea92fd0a53a5b0f75cd50"]
@@ -342,13 +357,6 @@ x-opam-monorepo-duniverse-dirs: [
     [
       "sha256=4ec9c9ec35cc45c18c7a143761154ef1d7663036a29297f80381f47981a07760"
       "sha512=978dba8dfa61f98fa24fda7a9c26c2e837081f37d1685fe636dc19cfc3278a940cf01a10293504b185c406706bc1008bc54313d50f023bcdea6d5ac6c0788b35"
-    ]
-  ]
-  [
-    "https://github.com/janestreet/ppx_sexp_conv/archive/refs/tags/v0.15.1.tar.gz"
-    "ppx_sexp_conv"
-    [
-      "sha256=e34647850c58992a463f29b11b863f9b1322adc0a98d3b16028012507e0c2e9d"
     ]
   ]
   [
@@ -453,11 +461,19 @@ x-opam-monorepo-duniverse-dirs: [
     ["md5=5dc2bf130c1db3c731fe0fffc5648b41"]
   ]
   [
-    "https://github.com/ocaml-ppx/ppxlib/releases/download/0.29.1/ppxlib-0.29.1.tbz"
+    "https://github.com/ocaml-ppx/ppx_deriving/releases/download/v5.2.1/ppx_deriving-v5.2.1.tbz"
+    "ppx_deriving"
+    [
+      "sha256=e96b5fb25b7632570e4b329e22e097fcd4b8e8680d1e43ef003a8fbd742b0786"
+      "sha512=f28cd778a2d48ababa53f73131b25229a11b03685610d020b7b9228b1e25570891cd927b37475aeda49be72debaf5f2dda4c1518a0965db7a361c0ebe325a8d2"
+    ]
+  ]
+  [
+    "https://github.com/ocaml-ppx/ppxlib/releases/download/0.25.1/ppxlib-0.25.1.tbz"
     "ppxlib"
     [
-      "sha256=c8ea8c8770414fdba6612e7f2d814b21a493daa974ea862a90c8e6c766e5dd79"
-      "sha512=edc468e9111cc26e31825e475fd72f55123a22fe86548e07e7d111796fecb8d60359b1b53c7eac383e5e2114cbae74dfd9c166f330e84cbeab4ddfd5797e322f"
+      "sha256=a51b3868029e62ff14a0f2bd8d278dacfc0c3fc5b22d484a296be90c53e4ffd7"
+      "sha512=6a6d9af49344e901cc9e6da7bcf38c2973705c8cee4cff1c64c0393e9ccc55a6abec1f58d5b56d0807939a3741bec722ee7bfc244f94619167a30438f182488a"
     ]
   ]
   [
@@ -533,6 +549,13 @@ x-opam-monorepo-duniverse-dirs: [
     "ppx_hash"
     [
       "sha256=45bb666a0f93aab5bc120126c4c7d4081d611c64969606799248b2d8418d1711"
+    ]
+  ]
+  [
+    "https://ocaml.janestreet.com/ocaml-core/v0.15/files/ppx_sexp_conv-v0.15.0.tar.gz"
+    "ppx_sexp_conv"
+    [
+      "sha256=d9cd1eefa179acedb8954ba95ed01e8fd685dae6e278061936ce5930d95a8380"
     ]
   ]
 ]

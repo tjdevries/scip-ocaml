@@ -4,9 +4,7 @@ let to_string (index : index) : string list =
   let metadata = index.metadata |> Option.value_exn in
   let root = metadata.project_root in
   let root = Base.String.chop_prefix_if_exists root ~prefix:"file://" in
-  List.map
-    ~f:(fun doc -> Caml.Format.sprintf "%s/%s" root doc.relative_path)
-    index.documents
+  List.map ~f:(fun doc -> Fmt.str "%s/%s" root doc.relative_path) index.documents
 ;;
 
 let sort_occurrences _ =
@@ -34,7 +32,7 @@ let format_occurrence (occ : occurrence) : string =
   let prefix = String.make start ' ' in
   let amount = finish - start in
   let underline = String.make amount '^' in
-  Caml.Format.sprintf "(*%s%s %s %s *)\n" prefix underline role occ.symbol
+  Fmt.str "(*%s%s %s %s *)\n" prefix underline role occ.symbol
 ;;
 
 let doc_to_string (doc : document) contents : string =
@@ -45,7 +43,7 @@ let doc_to_string (doc : document) contents : string =
   (* TODO: This iterates over the occurrences way more than it needs to *)
   List.iteri
     ~f:(fun i line ->
-      result := !result ^ Caml.Format.sprintf "  %s\n" line;
+      result := !result ^ Fmt.str "  %s\n" line;
       (* something *)
       Array.iter
         ~f:(fun o ->

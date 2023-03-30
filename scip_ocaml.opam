@@ -14,11 +14,14 @@ depends: [
   "ocaml-compiler-libs"
   "dune" {>= "3.7"}
   "base"
+  "fmt"
   "utop"
   "ocaml-protoc"
   "angstrom"
   "alcotest"
+  "cmdliner"
   "ppx_base"
+  "ppx_deriving_cmdliner"
   "merlin-lib" {>= "4.8"}
   "odoc" {with-doc}
 ]

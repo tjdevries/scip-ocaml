@@ -1,7 +1,6 @@
 (* Build with `ocamlbuild -pkg alcotest simple.byte` *)
 
 open Scip_ocaml
-open Scip_symbol
 open Scip_proto.Scip_types
 open Scip_proto
 
