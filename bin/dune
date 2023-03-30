@@ -8,6 +8,7 @@
   scip_ocaml
   base
   fmt
+  fpath
   cmdliner
   ppx_deriving_cmdliner
   compiler-libs.common

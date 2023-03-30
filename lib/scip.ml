@@ -1,30 +1,27 @@
 open Scip_proto.Scip_types
+module Dir = Bos.OS.Dir
 
 let ( let+ ) = Option.map
 let ( let* ) v f = Option.bind ~f v
 
 module CmFile = struct
   type t =
-    | Cmt of string
-    | Cmti of string
+    | Cmt of Fpath.t
+    | Cmti of Fpath.t
 
   let of_string s =
-    if Caml.Filename.check_suffix s ".cmt"
-    then Cmt s
-    else if Caml.Filename.check_suffix s ".cmti"
-    then Cmti s
-    else failwith "CmFile.of_string"
+    match Fpath.of_string s with
+    | Ok path when String.(Fpath.get_ext path = "cmt") -> Some (Cmt path)
+    | Ok path when String.(Fpath.get_ext path = "cmti") -> Some (Cmti path)
+    | _ -> None
   ;;
 
   let to_string = function
-    | Cmt s -> s
-    | Cmti s -> s
+    | Cmt s -> Fpath.to_string s
+    | Cmti s -> Fpath.to_string s
   ;;
 
-  let load_cmt = function
-    | Cmt s -> Cmt_format.read s
-    | Cmti s -> Cmt_format.read s
-  ;;
+  let load_cmt t = Cmt_format.read_cmt @@ to_string t
 end
 
 module ScipRange = struct
@@ -58,11 +55,7 @@ module StringMap = Map.M (String)
 
 let empty = Map.empty (module String)
 
-let find_cm_files dir =
-  let is_directory dir =
-    try Stdlib.Sys.is_directory dir with
-    | Sys_error _ -> false
-  in
+let find_cm_files (dir : Fpath.t) =
   let choose_file f1 f2 =
     let open CmFile in
     match f1, f2 with
@@ -71,25 +64,37 @@ let find_cm_files dir =
   in
   (* TODO we could get into a symlink loop here so we should we be careful *)
   let rec loop acc dir =
-    let contents = Stdlib.Sys.readdir dir in
-    Array.fold contents ~init:acc ~f:(fun acc fname ->
-      let path = Caml.Filename.concat dir fname in
-      if is_directory path
-      then loop acc path
-      else (
-        match String.rsplit2 ~on:'.' path with
-        | Some (path_without_ext, "cmt") ->
-          Map.set acc ~key:path_without_ext ~data:(CmFile.Cmt path)
-        | Some (path_without_ext, "cmti") ->
-          let current_file = Map.find acc path_without_ext in
-          let cmi_file = CmFile.Cmti path in
-          (match current_file with
-           | None -> Map.set acc ~key:path_without_ext ~data:cmi_file
-           | Some current_file ->
-             Map.set acc ~key:path_without_ext ~data:(choose_file current_file cmi_file))
-        | _ -> acc))
+    let contents =
+      match Dir.contents ~dotfiles:true ~rel:false dir with
+      | Ok contents -> contents
+      | _ -> assert false
+    in
+    let handle_file acc path =
+      let path_without_ext = Fpath.(path |> rem_ext |> to_string) in
+      match Fpath.get_ext path with
+      | ".cmt" -> Map.set acc ~key:path_without_ext ~data:(CmFile.Cmt path)
+      | ".cmti" ->
+        let current_file = Map.find acc path_without_ext in
+        let cmi_file = CmFile.Cmti path in
+        (match current_file with
+         | None -> Map.set acc ~key:path_without_ext ~data:cmi_file
+         | Some current_file ->
+           Map.set acc ~key:path_without_ext ~data:(choose_file current_file cmi_file))
+      | _ -> acc
+    in
+    List.fold contents ~init:acc ~f:(fun acc path ->
+      let is_directory =
+        match Dir.exists path with
+        | Ok is_directory -> is_directory
+        | _ -> assert false
+      in
+      (* TODO: Probably have some other directories we could skip? Could be configured *)
+      match path, is_directory with
+      | path, true when String.(Fpath.basename path = ".git") -> acc
+      | path, true -> loop acc path
+      | path, false -> handle_file acc path)
   in
-  loop empty dir |> Map.to_alist |> List.map ~f:(fun (_, v) -> CmFile.to_string v)
+  loop empty dir |> Map.to_alist |> List.map ~f:(fun (_, v) -> v)
 ;;
 
 module SymbolRoles = struct
@@ -111,23 +116,12 @@ let make_symbol ~descriptors ~name ~suffix ?disambiguator () =
 
 let make_documentation type_info = [ "```ocaml"; type_info; "```" ]
 
-let read_file filename =
-  try
-    let ch = Caml.open_in filename in
-    let content = Caml.really_input_string ch (Caml.in_channel_length ch) in
-    Caml.close_in ch;
-    Some content
-  with
-  | _ -> None
-;;
-
 module ScipDocument = struct
   open Typedtree
 
   let read document root =
-    let root = Base.String.chop_prefix_if_exists root ~prefix:"file://" in
-    let path = root ^ document.relative_path in
-    read_file path
+    let path = Fpath.(root / document.relative_path) in
+    Bos.OS.File.read path |> Result.ok
   ;;
 
   let handle_structure index_lookup document structure =
@@ -282,7 +276,7 @@ module ScipDocument = struct
   let make_document relative_path = default_document ~language:"ocaml" ~relative_path ()
 
   let get_symbols cmt_path =
-    let info = Cmt_format.read_cmt cmt_path in
+    let info = CmFile.load_cmt cmt_path in
     (* TODO: Need to merge all the globals together *)
     let* relative_path = info.cmt_sourcefile in
     let document = make_document relative_path in
@@ -293,7 +287,7 @@ module ScipDocument = struct
   ;;
 
   let of_cmt index_lookup cmt_path =
-    let info = Cmt_format.read_cmt cmt_path in
+    let info = CmFile.load_cmt cmt_path in
     let* relative_path = info.cmt_sourcefile in
     let document = make_document relative_path in
     match info.cmt_annots with
@@ -310,11 +304,11 @@ module ScipIndex = struct
   let name = "scip-ocaml"
   let version = "0.1"
 
-  let index project_root cmt_files =
+  let index root cmt_files =
     let open Symbol_iter in
     (* TODO Can you get the arguments just from Sys.argv or something? *)
     let tool_info = Some (default_tool_info ~name ~version ~arguments:[] ()) in
-    let project_root = "file://" ^ project_root in
+    let project_root = "file://" ^ Fpath.to_string root in
     let metadata = Some (default_metadata ~project_root ~tool_info ()) in
     (* It may be possible that we don't have to lookup EVERYTHING, but for now it's fine *)
     let index_lookup = IndexSymbols.init () in
@@ -331,10 +325,11 @@ module ScipIndex = struct
     (* TODO: Gotta think about how this works with external symbols *)
     let documents =
       List.fold_left cmt_files ~init:[] ~f:(fun acc cmt ->
+        Fmt.pr "Loading %s@." (CmFile.to_string cmt);
         match ScipDocument.of_cmt index_lookup cmt with
         | Some doc -> doc :: acc
         | None ->
-          Fmt.epr "Couldn't load %s" cmt;
+          Fmt.epr "Couldn't load %s" (CmFile.to_string cmt);
           acc)
     in
     default_index ~metadata ~documents ()
@@ -344,15 +339,15 @@ module ScipIndex = struct
     let p_encoder = Pbrt.Encoder.create () in
     let write_index = Scip_proto.Scip_pb.encode_index index in
     write_index p_encoder;
-    let bytes = Pbrt.Encoder.to_bytes p_encoder in
-    let file = Caml.open_out outfile in
-    Caml.output_bytes file bytes;
-    Caml.close_out file
+    let bytes = Pbrt.Encoder.to_string p_encoder in
+    Bos.OS.File.write outfile bytes
   ;;
 
   let deserialize infile =
-    let* contents = read_file infile in
-    let p_decoder = Pbrt.Decoder.of_string contents in
-    Some (Scip_proto.Scip_pb.decode_index p_decoder)
+    match Bos.OS.File.read infile with
+    | Ok contents ->
+      let p_decoder = Pbrt.Decoder.of_string contents in
+      Some (Scip_proto.Scip_pb.decode_index p_decoder)
+    | _ -> None
   ;;
 end

@@ -5,6 +5,8 @@
   ocaml-protoc
   base
   fmt
+  fpath
+  bos
   merlin-lib.ocaml_parsing
   angstrom
   compiler-libs.common)

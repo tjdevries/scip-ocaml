@@ -1,26 +1,23 @@
-[@@@alert "-unstable"]
-[@@@ocaml.warning "-26-27-32"]
-
 open Base
 open Scip_proto.Scip_types
 open Scip_ocaml
 
-let index project_root =
-  Fmt.pr "Indexing project at %s@." project_root;
+let index project_root outfile =
+  Fmt.pr "@.Indexing project at %s@." (Fpath.to_string project_root);
   let files = Scip.find_cm_files project_root in
-  List.iter ~f:(fun f -> Fmt.pr " Found: %s@." f) files;
   let index = Scip.ScipIndex.index project_root files in
-  Scip.ScipIndex.serialize index (project_root ^ "test.scip")
+  let _ = Scip.ScipIndex.serialize index Fpath.(project_root / outfile) in
+  ()
 ;;
 
-let snapshot project_root =
+let snapshot project_root outfile =
   let document_to_snapshot =
-    let path = project_root ^ "test.scip" in
+    let path = Fpath.(project_root / outfile) in
     let index =
       match Scip.ScipIndex.deserialize path with
       | Some index -> index
       | None ->
-        Fmt.epr "Failed to read snapshot: %s@." path;
+        Fmt.epr "Failed to read snapshot: %s@." (Fpath.to_string path);
         assert false
     in
     let with_docs =
@@ -34,19 +31,25 @@ let snapshot project_root =
   ()
 ;;
 
-(*  Now we can snapshot the documents *)
-
+(* NOTE: If i want to print these, then we derive show again *)
 type params =
   { command : string [@pos 0] [@docv "command"] (** Command for scip-ocaml to run *)
   ; project_root : string [@pos 1] [@docv "project_root"] [@default "."]
       (** Project root to index *)
+  ; outfile : string [@pos 2] [@docv "outfile"] [@default "index.scip"]
+      (** File to save index. *)
   }
-[@@deriving cmdliner, show]
+[@@deriving cmdliner]
 
 let actually_run (params : params) =
+  let project_root =
+    match Fpath.of_string params.project_root with
+    | Ok project_root -> project_root
+    | _ -> assert false
+  in
   match params.command with
-  | "index" -> index params.project_root
-  | "snapshot" -> snapshot params.project_root
+  | "index" -> index project_root params.outfile
+  | "snapshot" -> snapshot project_root params.outfile
   | _ -> Fmt.epr "Unknown command: %s@." params.command
 ;;
 

@@ -13,6 +13,7 @@ depends: [
   "base-threads" {= "base"}
   "base-unix" {= "base"}
   "bigstringaf" {= "0.9.1" & ?vendor}
+  "bos" {= "0.2.1+dune" & ?vendor}
   "cmdliner" {= "1.1.1+dune" & ?vendor}
   "cppo" {= "1.6.9" & ?vendor}
   "csexp" {= "1.5.1" & ?vendor}
@@ -20,6 +21,7 @@ depends: [
   "dune-configurator" {= "3.7.0" & ?vendor}
   "findlib" {= "1.9.5+dune" & ?vendor}
   "fmt" {= "0.9.0+dune" & ?vendor}
+  "fpath" {= "0.7.3+dune" & ?vendor}
   "lambda-term" {= "3.3.1" & ?vendor}
   "logs" {= "0.7.0+dune2" & ?vendor}
   "lwt" {= "5.6.1" & ?vendor}
@@ -50,6 +52,7 @@ depends: [
   "re" {= "1.10.4" & ?vendor}
   "react" {= "1.2.2+dune" & ?vendor}
   "result" {= "1.5" & ?vendor}
+  "rresult" {= "0.7.0+dune" & ?vendor}
   "seq" {= "base+dune" & ?vendor}
   "sexplib0" {= "v0.15.1" & ?vendor}
   "stdlib-shims" {= "0.3.0" & ?vendor}
@@ -87,6 +90,10 @@ pin-depends: [
     "https://github.com/inhabitedtype/bigstringaf/archive/0.9.1.tar.gz"
   ]
   [
+    "bos.0.2.1+dune"
+    "https://github.com/dune-universe/bos/releases/download/v0.2.1%2Bdune/bos-0.2.1.dune.tbz"
+  ]
+  [
     "cmdliner.1.1.1+dune"
     "https://erratique.ch/software/cmdliner/releases/cmdliner-1.1.1.tbz"
   ]
@@ -109,6 +116,10 @@ pin-depends: [
   [
     "fmt.0.9.0+dune"
     "https://github.com/dune-universe/fmt/releases/download/v0.9.0%2Bdune/fmt-0.9.0.dune.tbz"
+  ]
+  [
+    "fpath.0.7.3+dune"
+    "https://github.com/dune-universe/fpath/archive/v0.7.3+dune.tar.gz"
   ]
   [
     "lambda-term.3.3.1"
@@ -199,6 +210,10 @@ pin-depends: [
     "result.1.5"
     "https://github.com/janestreet/result/releases/download/1.5/result-1.5.tbz"
   ]
+  [
+    "rresult.0.7.0+dune"
+    "https://github.com/dune-universe/rresult/releases/download/v0.7.0%2Bdune/rresult-0.7.0.dune.tbz"
+  ]
   ["seq.base+dune" "https://github.com/c-cube/seq/archive/0.2.2.tar.gz"]
   [
     "sexplib0.v0.15.1"
@@ -266,11 +281,26 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
+    "https://github.com/dune-universe/bos/releases/download/v0.2.1%2Bdune/bos-0.2.1.dune.tbz"
+    "bos"
+    [
+      "sha256=c6a34311946ff906824cedc2d12825ee9ad73b73bfa1581fb8100d6fc3dd5c35"
+      "sha512=5a1422809050dfbebab9691f29109e8219e27ecc4bc50c2eb714dc59036811936e9c5860b13583ab0ba7c15a00ee5b515af25642cdc312a4814076d8e76e3fd7"
+    ]
+  ]
+  [
     "https://github.com/dune-universe/fmt/releases/download/v0.9.0%2Bdune/fmt-0.9.0.dune.tbz"
     "fmt"
     [
       "sha256=844ce674b3146aaf9c14088a0b817cef10c7152054d3cc984543463da978ff81"
       "sha512=27765423f43bdfbbdee50906faad14ecf653aaf2fdfc4db6b94791460aa32f3a3490b9d0c1a04aa3ecb0ac4333ea7ce5054251a67a0d67b64f3eb6d737afbf93"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/fpath/archive/v0.7.3+dune.tar.gz"
+    "fpath"
+    [
+      "sha256=792ecf88d2a311596106e30775864629558ed0c2d0501590fda55f363dbb6ebc"
     ]
   ]
   [
@@ -295,6 +325,14 @@ x-opam-monorepo-duniverse-dirs: [
     [
       "sha256=ccd70d8f3ae570a584a981a8b94f5c4c6f9a28f0d57ab8363ce45b153e56c711"
       "sha512=2da1abd7352756bb4b13cdee4ead1dc9832c89c5e06e6a528806a29d7118153d221e233b0381338370363c9726edf0eb8b4afbefe6fb967a6abb88c85144a08b"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/rresult/releases/download/v0.7.0%2Bdune/rresult-0.7.0.dune.tbz"
+    "rresult"
+    [
+      "sha256=3726c0ddf709e1886ef9adae83bf3696fa65466cc675d2494fa6ea9da9945a9f"
+      "sha512=e29d1a41fca85a301df370183740d89c6a23ceb7fa530e8ba3693917032d5784b7899b6f713fd5f66d49c3426811a65465f5709af23b3f9120017f94cd9a448e"
     ]
   ]
   [

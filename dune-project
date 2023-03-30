@@ -23,6 +23,8 @@
    ocaml ocaml-compiler-libs dune
    base
    fmt
+   fpath
+   bos
    utop
    ocaml-protoc
    angstrom
