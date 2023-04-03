@@ -1,1 +1,1 @@
-(library (name simple_module))
+(library (name simple_module) (flags (:standard -dtypedtree)))
