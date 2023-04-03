@@ -3,7 +3,9 @@
     type t =
 (*       ^ definition scip-ocaml opam . . simple_module/WithFunction#t# *)
       { x : int
+(*      ^ definition scip-ocaml opam . . simple_module/WithFunction#t/x. *)
       ; y : int
+(*      ^ definition scip-ocaml opam . . simple_module/WithFunction#t/y. *)
       }
   
     let read () = print_endline "read"
