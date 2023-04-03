@@ -67,7 +67,7 @@ let find_cm_files (dir : Fpath.t) =
     let contents =
       match Dir.contents ~dotfiles:true ~rel:false dir with
       | Ok contents -> contents
-      | _ -> assert false
+      | msg -> Rresult.R.failwith_error_msg msg
     in
     let handle_file acc path =
       let path_without_ext = Fpath.(path |> rem_ext |> to_string) in
@@ -325,7 +325,6 @@ module ScipIndex = struct
     (* TODO: Gotta think about how this works with external symbols *)
     let documents =
       List.fold_left cmt_files ~init:[] ~f:(fun acc cmt ->
-        Fmt.pr "Loading %s@." (CmFile.to_string cmt);
         match ScipDocument.of_cmt index_lookup cmt with
         | Some doc -> doc :: acc
         | None ->

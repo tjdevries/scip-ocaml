@@ -15,3 +15,17 @@
   (:standard -w -11 -open Base)))
 
 (data_only_dirs snapshots)
+
+(rule
+ (alias update-snapshots)
+ (action
+  (progn
+   (run dune build -f --root=/home/tjdevries/sourcegraph/scip_ocaml/lib/snapshots/input/single_function)
+   (run scip-ocaml snapshot-dir /home/tjdevries/sourcegraph/scip_ocaml/lib/snapshots/ --mode=promote))))
+
+(rule
+ (alias check-snapshots)
+ (action
+  (progn
+   (run dune build -f --root=/home/tjdevries/sourcegraph/scip_ocaml/lib/snapshots/input/single_function)
+   (run scip-ocaml snapshot-dir /home/tjdevries/sourcegraph/scip_ocaml/lib/snapshots/ --mode=diff))))

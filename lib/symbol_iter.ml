@@ -183,57 +183,54 @@ let find_symbols structure state tracker =
   in
   let local_iter = { default_iterator with value_binding = local_value_bind } in
   (* Used to generate top level symbol definitions *)
-  let value_binding this value =
-    if is_func_expression value
-    then (
-      iter_texp_function value;
-      default_iterator.value_binding this value)
-    else (
-      let pattern = value.vb_pat in
-      let expr = value.vb_expr in
-      let descriptors = IterState.(state.get_descriptors ()) in
-      let name =
-        match pattern.pat_desc with
-        | Tpat_var (ident, _) -> Ident.name ident
-        | _ -> "unknown"
-      in
-      let symbol =
-        match expr.exp_desc with
-        | Texp_function { arg_label; param; cases; partial } ->
-          let _ = arg_label in
-          let _ = param in
-          let _ = cases in
-          List.iter cases ~f:(fun { c_lhs; c_guard; c_rhs } ->
-            let _ = c_lhs in
-            let _ =
-              match c_lhs.pat_desc with
-              | Tpat_var (ident, _) -> Ident.name ident
-              | _ -> "unknown"
-            in
-            let _ = c_guard in
-            let _ = c_rhs in
-            ());
-          let _ = partial in
-          Some (make_symbol ~descriptors ~name ~suffix:Method ())
-        | Texp_constant _ -> Some (make_symbol ~descriptors ~name ~suffix:Term ())
-        | Texp_ident (path, _, _) ->
-          let _ = path in
-          None
-        | _ ->
+  let value_binding _ value =
+    let pattern = value.vb_pat in
+    let expr = value.vb_expr in
+    let descriptors = IterState.(state.get_descriptors ()) in
+    let name =
+      match pattern.pat_desc with
+      | Tpat_var (ident, _) -> Ident.name ident
+      | _ -> "unknown"
+    in
+    let symbol =
+      match expr.exp_desc with
+      | Texp_function { arg_label; param; cases; partial } ->
+        let _ = arg_label in
+        let _ = param in
+        let _ = cases in
+        List.iter cases ~f:(fun { c_lhs; c_guard; c_rhs } ->
+          let _ = c_lhs in
+          let _ =
+            match c_lhs.pat_desc with
+            | Tpat_var (ident, _) -> Ident.name ident
+            | _ -> "unknown"
+          in
+          let _ = c_guard in
+          let _ = c_rhs in
+          ());
+        let _ = partial in
+        Some (make_symbol ~descriptors ~name ~suffix:Method ())
+      | Texp_constant _ -> Some (make_symbol ~descriptors ~name ~suffix:Term ())
+      | Texp_ident (path, _, _) ->
+        let _ = path in
+        None
+      | _ ->
+        if false
+        then
           Caml.Format.printf
             "  -> unknown expr: %s %s@."
             name
             (Ttype_utils.print_type_expr expr.exp_type);
-          None
-      in
-      (* TODO: I'm not a huge fan of this... how to write better? *)
-      let _ =
-        match symbol with
-        | Some symbol -> SymbolTracker.add_global tracker pattern.pat_loc symbol
-        | None -> ()
-      in
-      (* Iterate through everything else *)
-      default_iterator.value_binding local_iter value)
+        None
+    in
+    (* TODO: I'm not a huge fan of this... how to write better? *)
+    let _ =
+      match symbol with
+      | Some symbol -> SymbolTracker.add_global tracker pattern.pat_loc symbol
+      | None -> ()
+    in
+    (* Iterate through everything else *)
+    default_iterator.value_binding local_iter value
   in
   let module_binding this module_ =
     let name = module_.mb_name.txt |> Option.value_exn in
@@ -260,6 +257,7 @@ let find_symbols structure state tracker =
 ;;
 
 let traverse document structure =
+  Fmt.pr "  Traversing Document: %s@." document.relative_path;
   let relative_path = document.relative_path in
   let relative_path = Caml.Filename.remove_extension relative_path in
   let descriptors =
