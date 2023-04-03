@@ -1,9 +1,1 @@
-(library
- (name snapshot_single_function))
-
-(rule
- (alias   runtest)
- (action
-  (diff
-    scip-snapshot/something-1.txt
-    scip-snapshot/something-2.txt)))
+(library (name snapshot_single_function))
