@@ -1,6 +1,7 @@
   module WithFunction = struct
 (*       ^^^^^^^^^^^^ definition scip-ocaml opam . . simple_module/WithFunction# *)
     type t =
+(*       ^ definition scip-ocaml opam . . simple_module/WithFunction#t# *)
       { x : int
       ; y : int
       }

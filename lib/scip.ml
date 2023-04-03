@@ -264,6 +264,25 @@ module ScipDocument = struct
               | Tstr_attribute _ -> ()
             in
             Tast_iterator.default_iterator.structure_item this item)
+      ; type_declaration =
+          (fun this type_declaration ->
+            let _ =
+              match IndexSymbols.lookup index_lookup type_declaration.typ_name.loc with
+              | Some symbol ->
+                let range = ScipRange.of_loc type_declaration.typ_name.loc in
+                let documentation =
+                  (* make_documentation @@ Fmt.str "%a" Printtyp.type_expr pat.pat_type *)
+                  make_documentation @@ Fmt.str "%s" (Ident.name type_declaration.typ_id)
+                in
+                add_occurence ~documentation
+                @@ default_occurrence
+                     ~range
+                     ~symbol
+                     ~symbol_roles:SymbolRoles.definition
+                     ()
+              | None -> ()
+            in
+            Tast_iterator.default_iterator.type_declaration this type_declaration)
       }
     in
     iter.structure iter structure;
