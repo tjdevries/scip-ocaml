@@ -89,36 +89,14 @@ module PatDesc = struct
     | Tpat_or _ -> "or"
     | Tpat_lazy _ -> "lazy"
   ;;
-
-  let name pattern =
-    match pattern.pat_desc with
-    | Tpat_var (ident, _) -> Ident.name ident
-    | _ -> assert false
-  ;;
 end
 
-let iter_texp_function (value : value_binding) =
-  let pattern = value.vb_pat in
-  let expr = value.vb_expr in
-  let _ =
-    match pattern.pat_desc with
-    | Tpat_var (ident, _) -> Ident.name ident
-    | _ -> assert false
-  in
-  match expr.exp_desc with
-  | Texp_function { arg_label; param; cases; partial } ->
-    let _ = arg_label in
-    let _ = param in
-    let _ = cases in
-    let _ = partial in
-    ()
-  | _ -> assert false
-;;
-
-let is_func_expression (value : value_binding) =
-  match value.vb_expr.exp_desc with
-  | Texp_function _ -> true
-  | _ -> false
+(*  TODO: Should use this more i think *)
+let pattern_name pattern =
+  match pattern.pat_desc with
+  | Tpat_var (ident, _) -> Some (Ident.name ident)
+  | Tpat_constant _ -> None
+  | _ -> None
 ;;
 
 let find_symbols structure state tracker =
@@ -126,11 +104,14 @@ let find_symbols structure state tracker =
   (* Used to generate symbols not that are local.
       Called by the iterator below *)
   let local_value_bind _ value =
-    let expr = value.vb_expr in
-    match expr.exp_desc with
-    | Texp_function _ -> SymbolTracker.add_local tracker value.vb_pat.pat_loc
-    | Texp_constant _ -> SymbolTracker.add_local tracker value.vb_pat.pat_loc
+    match value.vb_pat.pat_desc with
+    | Tpat_var _ -> SymbolTracker.add_local tracker value.vb_pat.pat_loc
     | _ -> ()
+    (* let expr = value.vb_expr in *)
+    (* match expr.exp_desc with *)
+    (* | Texp_function _ -> SymbolTracker.add_local tracker value.vb_pat.pat_loc *)
+    (* | Texp_constant _ -> SymbolTracker.add_local tracker value.vb_pat.pat_loc *)
+    (* | _ -> () *)
   in
   let local_iter = { default_iterator with value_binding = local_value_bind } in
   (* Used to generate top level symbol definitions *)
@@ -140,42 +121,52 @@ let find_symbols structure state tracker =
     let descriptors = IterState.(state.get_descriptors ()) in
     let name =
       match pattern.pat_desc with
-      | Tpat_var (ident, _) -> Ident.name ident
-      | _ -> "unknown"
+      | Tpat_var (ident, _) -> Some (Ident.name ident)
+      | _ -> None
     in
     let symbol =
       match expr.exp_desc with
-      | Texp_function { arg_label; param; cases; partial } ->
-        let _ = arg_label in
-        let _ = param in
-        let _ = cases in
-        List.iter cases ~f:(fun { c_lhs; c_guard; c_rhs } ->
-          let _ = c_lhs in
-          let _ =
-            match c_lhs.pat_desc with
-            | Tpat_var (ident, _) -> Ident.name ident
-            | _ -> "unknown"
-          in
-          let _ = c_guard in
-          let _ = c_rhs in
-          ());
-        let _ = partial in
-        Some (make_symbol ~descriptors ~name ~suffix:Method ())
-      | Texp_constant _ -> Some (make_symbol ~descriptors ~name ~suffix:Term ())
-      | Texp_ident (path, _, _) ->
-        let _ = path in
-        None
-      | _ ->
-        (* (Ttype_utils.print_type_expr expr.exp_type); *)
-        None
+      | Texp_function _ -> Some Method
+      | Texp_constant _ -> Some Term
+      | _ -> Some Term
     in
-    (* TODO: I'm not a huge fan of this... how to write better? *)
-    let _ =
-      match symbol with
-      | Some symbol -> SymbolTracker.add_global tracker pattern.pat_loc symbol
-      | None -> ()
+    let descriptor_scope =
+      match name, symbol with
+      | Some name, Some suffix ->
+        let symbol = make_symbol ~descriptors ~name ~suffix () in
+        SymbolTracker.add_global tracker pattern.pat_loc symbol;
+        Some (default_descriptor ~name ~suffix ())
+      | _ -> None
     in
-    (* Iterate through everything else *)
+    let rec handle_case case =
+      let pat = case.c_lhs in
+      pattern_name pat
+      |> Option.iter ~f:(fun name ->
+           let descriptors = IterState.(state.get_descriptors ()) in
+           let symbol = make_symbol ~descriptors ~name ~suffix:Parameter () in
+           SymbolTracker.add_global tracker pat.pat_loc symbol);
+      (* TODO: I think this is probably not that good instead, we should probably use something like a new
+               iterator, that can go over these and then exists when it's done handling the params *)
+      match case.c_rhs.exp_desc with
+      | Texp_function { cases; _ } -> List.iter ~f:handle_case cases
+      | _ -> ()
+    in
+    begin
+      match expr.exp_desc with
+      | Texp_function { cases; _ } ->
+        let descriptor_scope = Option.value_exn descriptor_scope in
+        IterState.(
+          state.with_descriptor descriptor_scope
+          @@ fun () -> List.iter ~f:handle_case cases)
+      | _ -> ()
+    end;
+    (* TODO: I think we can write this without copying *)
+    (* match descriptor_scope with *)
+    (* | Some descriptor_scope -> *)
+    (*   IterState.( *)
+    (*     state.with_descriptor descriptor_scope *)
+    (*     @@ fun () -> default_iterator.value_binding sub value) *)
+    (* | None -> default_iterator.value_binding sub value *)
     default_iterator.value_binding local_iter value
   in
   let module_binding this module_ =
@@ -214,8 +205,11 @@ let find_symbols structure state tracker =
     let symbol =
       make_symbol ~descriptors ~name:(Ident.name label.ld_id) ~suffix:Term ()
     in
-    SymbolTracker.add_global tracker label.ld_name.loc symbol;
+    SymbolTracker.add_global tracker label.ld_loc symbol;
     default_iterator.label_declaration this label
+  in
+  let label_description sub label_desc =
+    default_iterator.label_description sub label_desc
   in
   let iter =
     { default_iterator with
@@ -224,6 +218,7 @@ let find_symbols structure state tracker =
     ; case
     ; type_declaration
     ; label_declaration
+    ; label_description
     }
   in
   iter.structure iter structure

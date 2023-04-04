@@ -54,6 +54,7 @@ type iterator =
   ; with_constraint : iterator -> with_constraint -> unit
   ; (* Additional contstraints, by me *)
     label_declaration : iterator -> label_declaration -> unit
+  ; label_description : iterator -> Types.label_description -> unit
   }
 
 let iter_snd f (_, y) = f y
@@ -310,8 +311,9 @@ let expr sub { exp_loc; exp_extra; exp_desc; exp_env; exp_attributes; _ } =
   | Texp_record { fields; extended_expression; _ } ->
     Array.iter
       ~f:(function
-        | _, Kept _ -> ()
-        | _, Overridden (lid, exp) ->
+        | label, Kept _ -> sub.label_description sub label
+        | label, Overridden (lid, exp) ->
+          sub.label_description sub label;
           iter_loc sub lid;
           sub.expr sub exp)
       fields;
@@ -665,6 +667,7 @@ let value_binding sub { vb_loc; vb_pat; vb_expr; vb_attributes; _ } =
 ;;
 
 let env _sub _ = ()
+let label_description _sub _desc = ()
 
 let iter =
   { attribute
@@ -713,6 +716,7 @@ let iter =
   ; with_constraint
   ; (* Mine *)
     label_declaration
+  ; label_description
   }
 ;;
 
