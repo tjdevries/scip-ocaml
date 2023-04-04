@@ -52,6 +52,8 @@ type iterator =
   ; value_bindings : iterator -> rec_flag * value_binding list -> unit
   ; value_description : iterator -> value_description -> unit
   ; with_constraint : iterator -> with_constraint -> unit
+  ; (* Additional contstraints, by me *)
+    label_declaration : iterator -> label_declaration -> unit
   }
 
 let iter_snd f (_, y) = f y
@@ -146,7 +148,7 @@ let value_description sub x =
   sub.typ sub x.val_desc
 ;;
 
-let label_decl sub { ld_loc; ld_name; ld_type; ld_attributes; _ } =
+let label_declaration sub { ld_loc; ld_name; ld_type; ld_attributes; _ } =
   sub.location sub ld_loc;
   sub.attributes sub ld_attributes;
   iter_loc sub ld_name;
@@ -155,7 +157,7 @@ let label_decl sub { ld_loc; ld_name; ld_type; ld_attributes; _ } =
 
 let constructor_args sub = function
   | Cstr_tuple l -> List.iter ~f:(sub.typ sub) l
-  | Cstr_record l -> List.iter ~f:(label_decl sub) l
+  | Cstr_record l -> List.iter ~f:(sub.label_declaration sub) l
 ;;
 
 let constructor_decl sub x =
@@ -170,7 +172,7 @@ let constructor_decl sub x =
 let type_kind sub = function
   | Ttype_abstract -> ()
   | Ttype_variant list -> List.iter ~f:(constructor_decl sub) list
-  | Ttype_record list -> List.iter ~f:(label_decl sub) list
+  | Ttype_record list -> List.iter ~f:(sub.label_declaration sub) list
   | Ttype_open -> ()
 ;;
 
@@ -709,6 +711,8 @@ let iter =
   ; value_bindings
   ; value_description
   ; with_constraint
+  ; (* Mine *)
+    label_declaration
   }
 ;;
 

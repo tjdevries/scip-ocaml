@@ -207,22 +207,24 @@ let find_symbols structure state tracker =
     let type_descriptor = default_descriptor ~name ~suffix:Namespace () in
     IterState.(
       state.with_descriptor type_descriptor
-      @@ fun () ->
-      let _ =
-        match type_declaration.typ_kind with
-        | Ttype_record labels ->
-          List.iter labels ~f:(fun label ->
-            let descriptors = IterState.(state.get_descriptors ()) in
-            let symbol =
-              make_symbol ~descriptors ~name:(Ident.name label.ld_id) ~suffix:Term ()
-            in
-            SymbolTracker.add_global tracker label.ld_name.loc symbol)
-        | _ -> ()
-      in
-      default_iterator.type_declaration this type_declaration)
+      @@ fun () -> default_iterator.type_declaration this type_declaration)
+  in
+  let label_declaration this label =
+    let descriptors = IterState.(state.get_descriptors ()) in
+    let symbol =
+      make_symbol ~descriptors ~name:(Ident.name label.ld_id) ~suffix:Term ()
+    in
+    SymbolTracker.add_global tracker label.ld_name.loc symbol;
+    default_iterator.label_declaration this label
   in
   let iter =
-    { default_iterator with value_binding; module_binding; case; type_declaration }
+    { default_iterator with
+      value_binding
+    ; module_binding
+    ; case
+    ; type_declaration
+    ; label_declaration
+    }
   in
   iter.structure iter structure
 ;;

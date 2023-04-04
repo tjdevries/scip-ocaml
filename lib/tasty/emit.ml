@@ -64,7 +64,39 @@ let handle_structure index_lookup document arg_structure =
          @@ default_occurrence ~range ~symbol ~symbol_roles:SymbolRoles.definition ());
     Default.iter.module_binding sub module_
   in
-  let iter = { Default.iter with expr; module_binding; value_binding } in
+  let type_declaration this decl_t =
+    IndexSymbols.lookup index_lookup decl_t.typ_name.loc
+    |> Option.iter ~f:(fun symbol ->
+         let range = ScipRange.of_loc decl_t.typ_name.loc in
+         let documentation =
+           (* make_documentation @@ Fmt.str "%a" Printtyp.type_expr pat.pat_type *)
+           make_documentation @@ Fmt.str "%s" (Ident.name decl_t.typ_id)
+         in
+         add_occurence ~documentation
+         @@ default_occurrence ~range ~symbol ~symbol_roles:SymbolRoles.definition ());
+    Default.iter.type_declaration this decl_t
+  in
+  let label_declaration sub label =
+    IndexSymbols.lookup index_lookup label.ld_name.loc
+    |> Option.iter ~f:(fun symbol ->
+         let range = ScipRange.of_loc label.ld_name.loc in
+         let documentation =
+           (* make_documentation @@ Fmt.str "%a" Printtyp.type_expr label.ld_type *)
+           make_documentation @@ Fmt.str "%s" (Ident.name label.ld_id)
+         in
+         add_occurence ~documentation
+         @@ default_occurrence ~range ~symbol ~symbol_roles:SymbolRoles.definition ());
+    Default.iter.label_declaration sub label
+  in
+  let iter =
+    { Default.iter with
+      expr
+    ; module_binding
+    ; type_declaration
+    ; value_binding
+    ; label_declaration
+    }
+  in
   iter.structure iter arg_structure;
   Some !document
 ;;
