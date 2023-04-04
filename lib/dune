@@ -2,13 +2,14 @@
  (name scip_ocaml)
  (libraries
   scip_proto
+  scip_mods
+  tasty
   ocaml-protoc
   base
   fmt
   fpath
   bos
   merlin-lib.ocaml_parsing
-  angstrom
   compiler-libs.common)
  (preprocess (pps ppx_base))
  (flags

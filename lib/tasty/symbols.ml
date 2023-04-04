@@ -1,4 +1,5 @@
 open Scip_proto.Scip_types
+open Scip_mods
 open Typedtree
 
 type string_to_loc = string Map.M(ScipLoc).t
@@ -55,56 +56,6 @@ module IterState = struct
     in
     let get_descriptors () = !descriptors in
     { with_descriptor; get_descriptors }
-  ;;
-end
-
-(* document -> string ScipLocMap.t *)
-(* Map.find string -> string ScipLocaMap.t *)
-module DocumentSymbols = struct
-  type t =
-    { path : string
-    ; globals : string_to_loc
-    ; locals : string_to_loc
-    }
-
-  let init document globals locals = { path = document.relative_path; globals; locals }
-
-  let lookup this loc =
-    let loc = ScipLoc.of_loc loc in
-    match Map.find this.globals loc with
-    | Some symbol -> Some symbol
-    | None -> Map.find this.locals loc
-  ;;
-end
-
-module IndexSymbols = struct
-  (* TODO: locals should be multipler smaller maps, I think the lookup
-           would probably be much better... but oh well*)
-  type t =
-    { globals : string_to_loc
-    ; locals : string_to_loc
-    }
-
-  let init () =
-    { globals = Map.empty (module ScipLoc); locals = Map.empty (module ScipLoc) }
-  ;;
-
-  let merge this (doc : DocumentSymbols.t) =
-    let globals =
-      Map.fold doc.globals ~init:this.globals ~f:(fun ~key ~data ->
-        Map.add_exn ~key ~data)
-    in
-    let locals =
-      Map.fold doc.locals ~init:this.locals ~f:(fun ~key ~data -> Map.add_exn ~key ~data)
-    in
-    { globals; locals }
-  ;;
-
-  let lookup this loc =
-    let loc = ScipLoc.of_loc loc in
-    match Map.find this.globals loc with
-    | Some symbol -> Some symbol
-    | None -> Map.find this.locals loc
   ;;
 end
 
@@ -171,7 +122,7 @@ let is_func_expression (value : value_binding) =
 ;;
 
 let find_symbols structure state tracker =
-  let default_iterator = Tast_iterator.default_iterator in
+  let default_iterator = Default.iter in
   (* Used to generate symbols not that are local.
       Called by the iterator below *)
   let local_value_bind _ value =
@@ -215,12 +166,7 @@ let find_symbols structure state tracker =
         let _ = path in
         None
       | _ ->
-        if false
-        then
-          Caml.Format.printf
-            "  -> unknown expr: %s %s@."
-            name
-            (Ttype_utils.print_type_expr expr.exp_type);
+        (* (Ttype_utils.print_type_expr expr.exp_type); *)
         None
     in
     (* TODO: I'm not a huge fan of this... how to write better? *)
@@ -242,7 +188,7 @@ let find_symbols structure state tracker =
     state.with_descriptor module_descriptor
     @@ fun () -> default_iterator.module_binding this module_
   in
-  let case : 'k. Tast_iterator.iterator -> 'k case -> unit =
+  let case : 'k. Default.iterator -> 'k case -> unit =
    fun this c ->
     (* pat_desc; pat_loc; pat_extra; pat_type; pat_env; pat_attributes; *)
     let _ = c.c_lhs in
@@ -296,5 +242,5 @@ let traverse document structure =
     (SymbolTracker.get_globals tracker)
     (SymbolTracker.get_locals tracker)
 ;;
-
-(* TODO: Create local symbol iterator... just adds to local iterator *)
+(***)
+(* (* TODO: Create local symbol iterator... just adds to local iterator *) *)
