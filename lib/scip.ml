@@ -130,7 +130,7 @@ module ScipIndex = struct
   let index root cmt_files =
     (* TODO Can you get the arguments just from Sys.argv or something? *)
     let tool_info = Some (default_tool_info ~name ~version ~arguments:[] ()) in
-    let project_root = "file://" ^ Fpath.to_string root in
+    let project_root = "file://" ^ Unix.realpath (Fpath.to_string root) in
     let metadata = Some (default_metadata ~project_root ~tool_info ()) in
     (* It may be possible that we don't have to lookup EVERYTHING, but for now it's fine *)
     let index_lookup = Scip_mods.IndexSymbols.init () in
