@@ -1,8 +1,8 @@
 (* Build with `ocamlbuild -pkg alcotest simple.byte` *)
 
-open Scip_ocaml
 open Scip_proto.Scip_types
 open Scip_proto
+open Scip_mods
 
 (* This can let us get a parse tree for this *)
 (* let somethin = Lexing.from_string "let x = 5" |> Parse.expression *)

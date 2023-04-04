@@ -1,0 +1,9 @@
+(library
+ (name tasty)
+ (libraries
+   base
+   fmt
+   scip_proto
+   scip_mods
+   compiler-libs.common)
+ (flags (:standard -open Base)))
