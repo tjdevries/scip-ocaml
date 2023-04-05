@@ -46,6 +46,12 @@ let handle_structure index_lookup document arg_structure =
     in
     document := { !document with occurrences = occ :: !document.occurrences; symbols }
   in
+  let emit_label_reference lid (label : Types.label_description) =
+    IndexSymbols.lookup index_lookup label.lbl_loc
+    |> Option.iter ~f:(fun symbol ->
+         let range = ScipRange.of_loc lid.loc in
+         add_occurence @@ default_occurrence ~range ~symbol ())
+  in
   let expr sub expr_t =
     let _ =
       match expr_t.exp_desc with
@@ -60,12 +66,9 @@ let handle_structure index_lookup document arg_structure =
         Array.iter
           ~f:(function
             | _, Kept _ -> ()
-            | label, Overridden (lid, _) ->
-              IndexSymbols.lookup index_lookup label.lbl_loc
-              |> Option.iter ~f:(fun symbol ->
-                   let range = ScipRange.of_loc lid.loc in
-                   add_occurence @@ default_occurrence ~range ~symbol ()))
+            | label, Overridden (lid, _) -> emit_label_reference lid label)
           fields
+      | Texp_field (_, lid, label) -> emit_label_reference lid label
       | _ -> ()
     in
     Default.iter.expr sub expr_t

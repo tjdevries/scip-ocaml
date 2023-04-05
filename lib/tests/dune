@@ -1,4 +1,4 @@
 (test
  (name test_symbols)
  (modules test_symbols test_snapshots)
- (libraries alcotest scip_mods))
+ (libraries alcotest scip_mods scip_ocaml))
