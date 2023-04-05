@@ -3,23 +3,23 @@
     type t =
 (*       ^ definition scip-ocaml opam . . simple_module/WithFunction#t# *)
       { x : int
-(*      ^ definition scip-ocaml opam . . simple_module/WithFunction#t/x. *)
+(*      ^ definition scip-ocaml opam . . simple_module/WithFunction#t#x. *)
       ; y : int
-(*      ^ definition scip-ocaml opam . . simple_module/WithFunction#t/y. *)
+(*      ^ definition scip-ocaml opam . . simple_module/WithFunction#t#y. *)
       }
   
     let read () = print_endline "read"
 (*      ^^^^ definition scip-ocaml opam . . simple_module/WithFunction#read(). *)
     let init () = { x = 1; y = 2 }
-(*                         ^ reference scip-ocaml opam . . simple_module/WithFunction#t/y. *)
-(*                  ^ reference scip-ocaml opam . . simple_module/WithFunction#t/x. *)
+(*                         ^ reference scip-ocaml opam . . simple_module/WithFunction#t#y. *)
+(*                  ^ reference scip-ocaml opam . . simple_module/WithFunction#t#x. *)
 (*      ^^^^ definition scip-ocaml opam . . simple_module/WithFunction#init(). *)
     let add t i = { t with x = t.x + i }
 (*                  ^ reference scip-ocaml opam . . simple_module/WithFunction#add().(t) *)
 (*                                   ^ reference scip-ocaml opam . . simple_module/WithFunction#add().(i) *)
 (*                             ^ reference scip-ocaml opam . . simple_module/WithFunction#add().(t) *)
-(*                               ^ reference scip-ocaml opam . . simple_module/WithFunction#t/x. *)
-(*                         ^ reference scip-ocaml opam . . simple_module/WithFunction#t/x. *)
+(*                               ^ reference scip-ocaml opam . . simple_module/WithFunction#t#x. *)
+(*                         ^ reference scip-ocaml opam . . simple_module/WithFunction#t#x. *)
 (*            ^ definition scip-ocaml opam . . simple_module/WithFunction#add().(i) *)
 (*          ^ definition scip-ocaml opam . . simple_module/WithFunction#add().(t) *)
 (*      ^^^ definition scip-ocaml opam . . simple_module/WithFunction#add(). *)
@@ -27,8 +27,8 @@
 (*                  ^ reference scip-ocaml opam . . simple_module/WithFunction#sub().(t) *)
 (*                                   ^ reference scip-ocaml opam . . simple_module/WithFunction#sub().(i) *)
 (*                             ^ reference scip-ocaml opam . . simple_module/WithFunction#sub().(t) *)
-(*                               ^ reference scip-ocaml opam . . simple_module/WithFunction#t/y. *)
-(*                         ^ reference scip-ocaml opam . . simple_module/WithFunction#t/y. *)
+(*                               ^ reference scip-ocaml opam . . simple_module/WithFunction#t#y. *)
+(*                         ^ reference scip-ocaml opam . . simple_module/WithFunction#t#y. *)
 (*            ^ definition scip-ocaml opam . . simple_module/WithFunction#sub().(i) *)
 (*          ^ definition scip-ocaml opam . . simple_module/WithFunction#sub().(t) *)
 (*      ^^^ definition scip-ocaml opam . . simple_module/WithFunction#sub(). *)
