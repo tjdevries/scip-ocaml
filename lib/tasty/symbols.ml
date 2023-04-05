@@ -107,13 +107,8 @@ let find_symbols structure state tracker =
     match value.vb_pat.pat_desc with
     | Tpat_var _ -> SymbolTracker.add_local tracker value.vb_pat.pat_loc
     | _ -> ()
-    (* let expr = value.vb_expr in *)
-    (* match expr.exp_desc with *)
-    (* | Texp_function _ -> SymbolTracker.add_local tracker value.vb_pat.pat_loc *)
-    (* | Texp_constant _ -> SymbolTracker.add_local tracker value.vb_pat.pat_loc *)
-    (* | _ -> () *)
   in
-  let local_iter = { default_iterator with value_binding = local_value_bind } in
+  let local_iter = ref { default_iterator with value_binding = local_value_bind } in
   (* Used to generate top level symbol definitions *)
   let value_binding _ value =
     let pattern = value.vb_pat in
@@ -167,7 +162,7 @@ let find_symbols structure state tracker =
     (*     state.with_descriptor descriptor_scope *)
     (*     @@ fun () -> default_iterator.value_binding sub value) *)
     (* | None -> default_iterator.value_binding sub value *)
-    default_iterator.value_binding local_iter value
+    default_iterator.value_binding !local_iter value
   in
   let module_binding this module_ =
     let name = module_.mb_name.txt |> Option.value_exn in
@@ -211,16 +206,20 @@ let find_symbols structure state tracker =
   let label_description sub label_desc =
     default_iterator.label_description sub label_desc
   in
+  let expr sub expr = Default.iter.expr sub expr in
   let iter =
     { default_iterator with
       value_binding
     ; module_binding
     ; case
+    ; expr
     ; type_declaration
     ; label_declaration
     ; label_description
     }
   in
+  (* TODO: I think this may be kind of weird... but it's OK for now. *)
+  local_iter := { iter with value_binding = local_value_bind };
   iter.structure iter structure
 ;;
 
