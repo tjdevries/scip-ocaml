@@ -61,18 +61,23 @@ end
 
 let default_package = Some (default_package ~manager:"opam" ~name:"." ~version:"." ())
 
-(* NOTE: descriptors is reversed from the way that you're going to actually
-   use them, since that allows you to super easily pop on and off the scope.
-
-   We just reverse it when we make a symbol... maybe that's stupid :) *)
-let make_symbol ~descriptors ~name ~suffix ?disambiguator () =
-  let descriptors = default_descriptor ~name ~suffix ?disambiguator () :: descriptors in
+let make_symbol_with_descriptor descriptors descriptor =
+  let descriptors = descriptor :: descriptors in
   ScipSymbol.to_string
   @@ default_symbol
        ~scheme:"scip-ocaml"
        ~package:default_package
        ~descriptors:(List.rev descriptors)
        ()
+;;
+
+(* NOTE: descriptors is reversed from the way that you're going to actually
+   use them, since that allows you to super easily pop on and off the scope.
+
+   We just reverse it when we make a symbol... maybe that's stupid :) *)
+let make_symbol ~descriptors ~name ~suffix ?disambiguator () =
+  make_symbol_with_descriptor descriptors
+  @@ default_descriptor ~name ~suffix ?disambiguator ()
 ;;
 
 module PatDesc = struct
@@ -128,9 +133,10 @@ let find_symbols structure state tracker =
     let descriptor_scope =
       match name, symbol with
       | Some name, Some suffix ->
-        let symbol = make_symbol ~descriptors ~name ~suffix () in
+        let descriptor = default_descriptor ~name ~suffix () in
+        let symbol = make_symbol_with_descriptor descriptors descriptor in
         SymbolTracker.add_global tracker pattern.pat_loc symbol;
-        Some (default_descriptor ~name ~suffix ())
+        Some descriptor
       | _ -> None
     in
     let rec handle_case case =
@@ -167,10 +173,9 @@ let find_symbols structure state tracker =
   let module_binding this module_ =
     let name = module_.mb_name.txt |> Option.value_exn in
     let descriptors = IterState.(state.get_descriptors ()) in
-    let symbol = make_symbol ~descriptors ~name ~suffix:Type () in
-    SymbolTracker.add_global tracker module_.mb_name.loc symbol;
-    (* TODO: Determine if this should be type or namespace... *)
     let module_descriptor = default_descriptor ~name ~suffix:Type () in
+    let symbol = make_symbol_with_descriptor descriptors module_descriptor in
+    SymbolTracker.add_global tracker module_.mb_name.loc symbol;
     state.with_descriptor module_descriptor
     @@ fun () -> default_iterator.module_binding this module_
   in
@@ -187,10 +192,9 @@ let find_symbols structure state tracker =
   let type_declaration this type_declaration =
     let name = type_declaration.typ_name.txt in
     let descriptors = IterState.(state.get_descriptors ()) in
-    let symbol = make_symbol ~descriptors ~name ~suffix:Type () in
+    let type_descriptor = default_descriptor ~name ~suffix:Type () in
+    let symbol = make_symbol_with_descriptor descriptors type_descriptor in
     SymbolTracker.add_global tracker type_declaration.typ_name.loc symbol;
-    (* TODO: Should not have to copy making the descriptor twice *)
-    let type_descriptor = default_descriptor ~name ~suffix:Namespace () in
     IterState.(
       state.with_descriptor type_descriptor
       @@ fun () -> default_iterator.type_declaration this type_declaration)
