@@ -13,6 +13,17 @@ let index project_root outfile =
   ()
 ;;
 
+let compare_range (a : int32 list) (b : int32 list) =
+  let open Int32 in
+  match a, b with
+  | a :: _ :: _, b :: _ :: _ when a <> b -> a - b |> to_int_exn
+  | _ :: a :: _, _ :: b :: _ when a <> b -> a - b |> to_int_exn
+  | _ :: _ :: a :: _, _ :: _ :: b :: _ when a <> b -> a - b |> to_int_exn
+  | _ -> 0
+;;
+
+let compare_occ a b = compare_range a.range b.range
+
 let snapshot project_root outfile snapshot_dir mode =
   Fmt.pr "  Snapshotting project at: %s@." (Fpath.to_string project_root);
   let _ = index project_root outfile in
@@ -27,6 +38,11 @@ let snapshot project_root outfile snapshot_dir mode =
     in
     let with_docs =
       List.filter_map index.documents ~f:(fun document ->
+        let document =
+          { document with
+            occurrences = List.sort document.occurrences ~compare:compare_occ
+          }
+        in
         let* snapshot = Scip.ScipDocument.read document project_root in
         let snapshot = Scip_snapshot.doc_to_string document snapshot in
         Some (document.relative_path, snapshot))

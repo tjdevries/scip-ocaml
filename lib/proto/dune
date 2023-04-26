@@ -4,6 +4,9 @@
   (flags (:standard -w -11)))
 
 (rule
+ (deps scip.proto)
+ (action
+  (run ocaml-protoc -binary -pp -ml_out ./ scip.proto))
  (targets
   scip_pb.ml
   scip_pb.mli
@@ -11,7 +14,4 @@
   scip_pp.mli
   scip_types.ml
   scip_types.mli)
- (action
-  (run ocaml-protoc -binary -pp -ml_out ./ scip.proto))
- (deps scip.proto)
  (mode promote))
